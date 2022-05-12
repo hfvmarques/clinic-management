@@ -6,6 +6,8 @@
   "scripts": {
     "lint": "eslint ./src ./test --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint ./src ./test --ext .js,.jsx,.ts,.tsx --fix",
+    "style:check": "prettier --check './src/**/*.{js,jsx,ts,tsx}' './test/**/*.{js,jsx,ts,tsx}'",
+    "style:fix": "prettier --write './src/**/*.{js,jsx,ts,tsx}' './test/**/*.{js,jsx,ts,tsx}'",
     "start:dev": "node-dev src/index.js",
     "test": "jest"
   },
@@ -21,6 +23,7 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.2",
     "jest": "^28.1.0",
-    "node-dev": "^7.4.3"
+    "node-dev": "^7.4.3",
+    "prettier": "^2.6.2"
   }
 }
