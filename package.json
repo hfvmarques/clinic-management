@@ -1,0 +1,26 @@
+{
+  "name": "clinic_management",
+  "version": "1.0.0",
+  "description": "api for clinic management",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint ./src ./test --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint ./src ./test --ext .js,.jsx,.ts,.tsx --fix",
+    "start:dev": "node-dev src/index.js",
+    "test": "jest"
+  },
+  "keywords": [
+    "nodejs",
+    "api",
+    "rest"
+  ],
+  "author": "@hfvmarques",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^7.32.0 || ^8.2.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.2",
+    "jest": "^28.1.0",
+    "node-dev": "^7.4.3"
+  }
+}
