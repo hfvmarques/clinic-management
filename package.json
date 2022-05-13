@@ -8,7 +8,7 @@
     "lint:fix": "eslint ./src ./test --ext .js,.jsx,.ts,.tsx --fix",
     "style:check": "prettier --check './src/**/*.{js,jsx,ts,tsx}' './test/**/*.{js,jsx,ts,tsx}'",
     "style:fix": "prettier --write './src/**/*.{js,jsx,ts,tsx}' './test/**/*.{js,jsx,ts,tsx}'",
-    "start:dev": "node-dev src/index.js",
+    "start:dev": "node-dev src/server.js",
     "test": "jest"
   },
   "keywords": [
@@ -24,6 +24,10 @@
     "eslint-plugin-import": "^2.25.2",
     "jest": "^28.1.0",
     "node-dev": "^7.4.3",
-    "prettier": "^2.6.2"
+    "prettier": "^2.6.2",
+    "supertest": "^6.2.3"
+  },
+  "dependencies": {
+    "express": "^4.18.1"
   }
 }
