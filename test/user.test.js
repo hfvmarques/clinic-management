@@ -22,3 +22,12 @@ it('must list user prop', () =>
     .then((res) => {
       expect(res.body[0]).toHaveProperty('name', 'John Doe');
     }));
+
+it('must create a user', () =>
+  request(app)
+    .post('/users')
+    .send({ name: 'Walter White', email: 'walter@white.com' })
+    .then((res) => {
+      expect(res.status).toBe(201);
+      expect(res.body.name).toBe('Walter White');
+    }));
