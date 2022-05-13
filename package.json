@@ -9,7 +9,9 @@
     "style:check": "prettier --check './src/**/*.{js,jsx,ts,tsx}' './test/**/*.{js,jsx,ts,tsx}'",
     "style:fix": "prettier --write './src/**/*.{js,jsx,ts,tsx}' './test/**/*.{js,jsx,ts,tsx}'",
     "start:dev": "node-dev src/server.js",
-    "test": "jest"
+    "start": "node src/server.js",
+    "test": "jest",
+    "test:live": "jest --watch --verbose=true"
   },
   "keywords": [
     "nodejs",

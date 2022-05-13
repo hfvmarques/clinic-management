@@ -10,6 +10,7 @@
     "sourceType": "module"
   },
   "rules": {
-    "prefer-const": "off"
+    "prefer-const": "off",
+    "implicit-arrow-linebreak": "off"
   }
 }
