@@ -7,6 +7,7 @@ app.db = knex(knexfile.test);
 
 consign({ cwd: 'src', verbose: false })
   .include('./config/middleware.js')
+  .then('./services')
   .then('./routes')
   .then('./config/routes.js')
   .into(app);
