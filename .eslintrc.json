@@ -11,6 +11,12 @@
   },
   "rules": {
     "prefer-const": "off",
-    "implicit-arrow-linebreak": "off"
+    "implicit-arrow-linebreak": "off",
+    "comma-dangle": [
+      "error",
+      {
+        "objects": "ignore"
+      }
+    ]
   }
 }
