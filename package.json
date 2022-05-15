@@ -4,6 +4,8 @@
   "description": "api for clinic management",
   "main": "index.js",
   "scripts": {
+    "knex": "node_modules/.bin/knex",
+    "knex:migrate": "node_modules/.bin/knex migrate:latest",
     "lint": "eslint ./src ./test --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint ./src ./test --ext .js,.jsx,.ts,.tsx --fix",
     "style:check": "prettier --check './src/**/*.{js,jsx,ts,tsx}' './test/**/*.{js,jsx,ts,tsx}'",

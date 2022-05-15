@@ -9,22 +9,6 @@ it('must have status 200', () =>
       expect(res.status).toBe(200);
     }));
 
-it('must list one user', () =>
-  request(app)
-    .get('/users')
-    .then((res) => {
-      expect(res.body.length).toBeGreaterThan(0);
-    }));
-
-it('must list user prop', () =>
-  request(app)
-    .get('/users')
-    .then((res) => {
-      expect(res.body[0]).toHaveProperty('name');
-      expect(res.body[0]).toHaveProperty('email');
-      expect(res.body[0]).toHaveProperty('password');
-    }));
-
 it('must create a user', () => {
   const email = `${Date.now()}@email.com`;
 
@@ -40,6 +24,22 @@ it('must create a user', () => {
       expect(res.body.name).toBe('Walter White');
     });
 });
+
+it('must list one user', () =>
+  request(app)
+    .get('/users')
+    .then((res) => {
+      expect(res.body.length).toBeGreaterThan(0);
+    }));
+
+it('must list user prop', () =>
+  request(app)
+    .get('/users')
+    .then((res) => {
+      expect(res.body[0]).toHaveProperty('name');
+      expect(res.body[0]).toHaveProperty('email');
+      expect(res.body[0]).toHaveProperty('password');
+    }));
 
 it('must not create a user without a name', () => {
   const email = `${Date.now()}@email.com`;
