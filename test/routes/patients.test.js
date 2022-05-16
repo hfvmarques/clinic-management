@@ -12,15 +12,15 @@ function createRandomCpf() {
 // eslint-disable-next-line no-unused-vars
 let user;
 
-beforeAll(async () => {
-  const email = `${Date.now()}@email.com`;
-  const res = await app.services.user.create({
-    name: 'User Account',
-    email,
-    password: '123456',
-  });
-  user = { ...res[0] };
-});
+// beforeAll(async () => {
+//   const email = `${Date.now()}@email.com`;
+//   const res = await app.services.user.create({
+//     name: 'User Account',
+//     email,
+//     password: '123456',
+//   });
+//   user = { ...res[0] };
+// });
 
 it('must create a patient successfully', () => {
   const email = `${Date.now()}@email.com`;
@@ -58,5 +58,27 @@ it('must list all patients', () => {
     .then((res) => {
       expect(res.status).toBe(200);
       expect(res.body.length).toBeGreaterThan(0);
+    });
+});
+
+it('must list a patient per id', () => {
+  const email = `${Date.now()}@email.com`;
+  const date = new Date('1952-01-21').toISOString();
+
+  return app
+    .db('patients')
+    .insert(
+      {
+        cpf: createRandomCpf(),
+        name: 'Olivia Vera Renata Nascimento',
+        email,
+        birthDate: date,
+        gender: 'F',
+      },
+      ['id']
+    )
+    .then((patient) => request(app).get(`${MAIN_ROUTE}/${patient[0].id}`))
+    .then((res) => {
+      expect(res.status).toBe(200);
     });
 });

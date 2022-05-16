@@ -8,4 +8,6 @@ module.exports = (app) => {
     .route('/patients')
     .get(app.routes.patients.findAll)
     .post(app.routes.patients.create);
+
+  app.route('/patients/:id').get(app.routes.patients.findById);
 };
