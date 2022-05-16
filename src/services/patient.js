@@ -8,10 +8,13 @@ module.exports = (app) => {
   const update = (id, patient) =>
     app.db('patients').where({ id }).update(patient, '*');
 
+  const remove = (id) => app.db('patients').where({ id }).del();
+
   return {
     findAll,
     find,
     create,
     update,
+    remove,
   };
 };

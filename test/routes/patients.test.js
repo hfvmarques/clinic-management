@@ -110,3 +110,25 @@ it('must update a patient', () => {
       expect(res.body.name).toBe('Renata Nascimento');
     });
 });
+
+it('must remove a patient', () => {
+  const email = `${Date.now()}@email.com`;
+  const date = new Date('1952-01-21').toISOString();
+
+  return app
+    .db('patients')
+    .insert(
+      {
+        cpf: createRandomCpf(),
+        name: 'Olivia Vera',
+        email,
+        birthDate: date,
+        gender: 'F',
+      },
+      ['id']
+    )
+    .then((patient) => request(app).delete(`${MAIN_ROUTE}/${patient[0].id}`))
+    .then((res) => {
+      expect(res.status).toBe(204);
+    });
+});

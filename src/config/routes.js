@@ -12,5 +12,6 @@ module.exports = (app) => {
   app
     .route('/patients/:id')
     .get(app.routes.patients.findById)
-    .put(app.routes.patients.update);
+    .put(app.routes.patients.update)
+    .delete(app.routes.patients.remove);
 };
