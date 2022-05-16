@@ -1,3 +1,4 @@
+/* eslint-disable function-paren-newline */
 const request = require('supertest');
 const app = require('../../src/app');
 
@@ -80,5 +81,32 @@ it('must list a patient per id', () => {
     .then((patient) => request(app).get(`${MAIN_ROUTE}/${patient[0].id}`))
     .then((res) => {
       expect(res.status).toBe(200);
+    });
+});
+
+it('must update a patient', () => {
+  const email = `${Date.now()}@email.com`;
+  const date = new Date('1952-01-21').toISOString();
+
+  return app
+    .db('patients')
+    .insert(
+      {
+        cpf: createRandomCpf(),
+        name: 'Olivia Vera',
+        email,
+        birthDate: date,
+        gender: 'F',
+      },
+      ['id']
+    )
+    .then((patient) =>
+      request(app)
+        .put(`${MAIN_ROUTE}/${patient[0].id}`)
+        .send({ name: 'Renata Nascimento' })
+    )
+    .then((res) => {
+      expect(res.status).toBe(200);
+      expect(res.body.name).toBe('Renata Nascimento');
     });
 });

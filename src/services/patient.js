@@ -5,5 +5,13 @@ module.exports = (app) => {
 
   const create = (patient) => app.db('patients').insert(patient, '*');
 
-  return { findAll, find, create };
+  const update = (id, patient) =>
+    app.db('patients').where({ id }).update(patient, '*');
+
+  return {
+    findAll,
+    find,
+    create,
+    update,
+  };
 };

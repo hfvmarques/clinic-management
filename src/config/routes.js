@@ -9,5 +9,8 @@ module.exports = (app) => {
     .get(app.routes.patients.findAll)
     .post(app.routes.patients.create);
 
-  app.route('/patients/:id').get(app.routes.patients.findById);
+  app
+    .route('/patients/:id')
+    .get(app.routes.patients.findById)
+    .put(app.routes.patients.update);
 };
