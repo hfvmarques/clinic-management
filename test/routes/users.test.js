@@ -2,6 +2,9 @@ const request = require('supertest');
 
 const app = require('../../src/app');
 
+const buildEmail = () => `${Date.now()}@email.com`;
+const name = 'Walter White';
+
 it('must have status 200', () =>
   request(app)
     .get('/users')
@@ -9,21 +12,18 @@ it('must have status 200', () =>
       expect(res.status).toBe(200);
     }));
 
-it('must create a user', () => {
-  const email = `${Date.now()}@email.com`;
-
-  return request(app)
+it('must create a user', () =>
+  request(app)
     .post('/users')
     .send({
-      name: 'Walter White',
-      email,
+      name,
+      email: buildEmail(),
       password: '123456',
     })
     .then((res) => {
       expect(res.status).toBe(201);
       expect(res.body.name).toBe('Walter White');
-    });
-});
+    }));
 
 it('must list one user', () =>
   request(app)
@@ -41,24 +41,21 @@ it('must list user prop', () =>
       expect(res.body[0]).toHaveProperty('password');
     }));
 
-it('must not create a user without a name', () => {
-  const email = `${Date.now()}@email.com`;
-
-  return request(app)
+it('must not create a user without a name', () =>
+  request(app)
     .post('/users')
     .send({
-      email,
+      email: buildEmail(),
       password: '123456',
     })
     .then((res) => {
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('Name is required.');
-    });
-});
+    }));
 
 it('must not create a user without an email', async () => {
   const result = await request(app).post('/users').send({
-    name: 'Walter White',
+    name,
     password: '123456',
   });
   expect(result.status).toBe(400);
@@ -66,13 +63,11 @@ it('must not create a user without an email', async () => {
 });
 
 it('must not create a user without a password', (done) => {
-  const email = `${Date.now()}@email.com`;
-
   request(app)
     .post('/users')
     .send({
-      name: 'Walter White',
-      email,
+      name,
+      email: buildEmail(),
     })
     .then((res) => {
       expect(res.status).toBe(400);
@@ -82,21 +77,21 @@ it('must not create a user without a password', (done) => {
 });
 
 it('must not create a user with an existing email', () => {
-  const email = 'walter@white.com';
+  const sameEmail = 'walter@white.com';
 
   return request(app)
     .post('/users')
     .send({
-      name: 'Walter White',
-      email,
+      name,
+      email: sameEmail,
       password: '123456',
     })
     .then(
       request(app)
         .post('/users')
         .send({
-          name: 'Walter White',
-          email,
+          name,
+          email: sameEmail,
           password: '123456',
         })
         .then((res) => {
