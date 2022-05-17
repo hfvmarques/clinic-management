@@ -114,3 +114,131 @@ it('must remove a patient', () =>
     .then((res) => {
       expect(res.status).toBe(204);
     }));
+
+it('must not create a patient without a name', () =>
+  request(app)
+    .post(MAIN_ROUTE)
+    .send({
+      cpf: buildCpf(),
+      email: buildEmail(),
+      birthDate: date,
+      gender,
+    })
+    .then((result) => {
+      expect(result.status).toBe(400);
+      expect(result.body.error).toBe('Name is required.');
+    }));
+
+it('must not create a patient without a cpf', () =>
+  request(app)
+    .post(MAIN_ROUTE)
+    .send({
+      name,
+      email: buildEmail(),
+      birthDate: date,
+      gender,
+    })
+    .then((result) => {
+      expect(result.status).toBe(400);
+      expect(result.body.error).toBe('CPF is required.');
+    }));
+
+it('must not create a patient without an email', () =>
+  request(app)
+    .post(MAIN_ROUTE)
+    .send({
+      cpf: buildCpf(),
+      name,
+      birthDate: date,
+      gender,
+    })
+    .then((result) => {
+      expect(result.status).toBe(400);
+      expect(result.body.error).toBe('Email is required.');
+    }));
+
+it('must not create a patient without a birth date', () =>
+  request(app)
+    .post(MAIN_ROUTE)
+    .send({
+      cpf: buildCpf(),
+      name,
+      email: buildEmail(),
+      gender,
+    })
+    .then((result) => {
+      expect(result.status).toBe(400);
+      expect(result.body.error).toBe('Birth date is required.');
+    }));
+
+it('must not create a patient without a gender', () =>
+  request(app)
+    .post(MAIN_ROUTE)
+    .send({
+      cpf: buildCpf(),
+      name,
+      email: buildEmail(),
+      birthDate: date,
+    })
+    .then((result) => {
+      expect(result.status).toBe(400);
+      expect(result.body.error).toBe('Gender is required.');
+    }));
+
+it('must not create a patient with duplicated cpf', () => {
+  const duplicatedCpf = '12345678910';
+
+  return request(app)
+    .post(MAIN_ROUTE)
+    .send({
+      cpf: duplicatedCpf,
+      name,
+      email: buildEmail(),
+      birthDate: date,
+      gender,
+    })
+    .then(
+      request(app)
+        .post(MAIN_ROUTE)
+        .send({
+          cpf: duplicatedCpf,
+          name,
+          email: buildEmail(),
+          birthDate: date,
+          gender,
+        })
+        .then((result) => {
+          expect(result.status).toBe(400);
+          expect(result.body.error).toBe('CPF already registered.');
+        })
+    );
+});
+
+it('must not create a patient with duplicated email', () => {
+  const duplicatedEmail = 'email@email.com';
+
+  return request(app)
+    .post(MAIN_ROUTE)
+    .send({
+      cpf: buildCpf(),
+      name,
+      email: duplicatedEmail,
+      birthDate: date,
+      gender,
+    })
+    .then(
+      request(app)
+        .post(MAIN_ROUTE)
+        .send({
+          cpf: buildCpf(),
+          name,
+          email: duplicatedEmail,
+          birthDate: date,
+          gender,
+        })
+        .then((result) => {
+          expect(result.status).toBe(400);
+          expect(result.body.error).toBe('Email already registered.');
+        })
+    );
+});
