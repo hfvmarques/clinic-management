@@ -1,7 +1,15 @@
+const bcrypt = require('bcrypt');
+
 const ValidationError = require('../errors/ValidationError');
 
 module.exports = (app) => {
-  const findAll = () => app.db('users').select();
+  const getPasswordHash = (password) => {
+    const salt = bcrypt.genSaltSync(10);
+
+    return bcrypt.hashSync(password, salt);
+  };
+
+  const findAll = () => app.db('users').select(['id', 'name', 'email']);
 
   const find = (filter = {}) => app.db('users').where(filter).first();
 
@@ -14,7 +22,9 @@ module.exports = (app) => {
 
     if (existingUser) throw new ValidationError('Email already exists.');
 
-    return app.db('users').insert(user, '*');
+    const newUser = { ...user };
+    newUser.password = getPasswordHash(user.password);
+    return app.db('users').insert(newUser, ['id', 'name', 'email']);
   };
 
   return { findAll, find, create };

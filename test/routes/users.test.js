@@ -25,6 +25,34 @@ it('must create a user', () =>
       expect(res.body.name).toBe('Walter White');
     }));
 
+it('must not return user password in body response', () =>
+  request(app)
+    .post('/users')
+    .send({
+      name,
+      email: buildEmail(),
+      password: '123456',
+    })
+    .then((res) => {
+      expect(res.body).not.toHaveProperty('password');
+    }));
+
+it('must store crypto password', async () => {
+  const res = await request(app).post('/users').send({
+    name,
+    email: buildEmail(),
+    password: '123456',
+  });
+  expect(res.status).toBe(201);
+
+  const { id } = res.body;
+
+  const userDb = await app.services.user.find({ id });
+
+  expect(userDb.password).not.toBeUndefined();
+  expect(userDb.password).not.toBe('123456');
+});
+
 it('must list one user', () =>
   request(app)
     .get('/users')
@@ -38,7 +66,6 @@ it('must list user prop', () =>
     .then((res) => {
       expect(res.body[0]).toHaveProperty('name');
       expect(res.body[0]).toHaveProperty('email');
-      expect(res.body[0]).toHaveProperty('password');
     }));
 
 it('must not create a user without a name', () =>
