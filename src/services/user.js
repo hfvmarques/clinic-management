@@ -1,19 +1,19 @@
 module.exports = (app) => {
-  const findAll = (filter = {}) => app.db('users').where(filter).select();
+  const findAll = () => app.db('users').select();
+
+  const find = (filter = {}) => app.db('users').where(filter).first();
 
   const create = async (user) => {
     if (!user.name) return { error: 'Name is required.' };
     if (!user.email) return { error: 'Email is required.' };
     if (!user.password) return { error: 'Password is required.' };
 
-    const existingUser = await findAll({ email: user.email });
+    const existingUser = await find({ email: user.email });
 
-    if (existingUser && existingUser.length > 0) {
-      return { error: 'Email already exists.' };
-    }
+    if (existingUser) return { error: 'Email already exists.' };
 
     return app.db('users').insert(user, '*');
   };
 
-  return { findAll, create };
+  return { findAll, find, create };
 };
