@@ -1,20 +1,24 @@
+const ValidationError = require('../errors/ValidationError');
+
 module.exports = (app) => {
   const findAll = () => app.db('patients').select();
 
   const find = (filter = {}) => app.db('patients').where(filter).first();
 
   const create = async (patient) => {
-    if (!patient.name) return { error: 'Name is required.' };
-    if (!patient.cpf) return { error: 'CPF is required.' };
-    if (!patient.email) return { error: 'Email is required.' };
-    if (!patient.birthDate) return { error: 'Birth date is required.' };
-    if (!patient.gender) return { error: 'Gender is required.' };
+    if (!patient.name) throw new ValidationError('Name is required.');
+    if (!patient.cpf) throw new ValidationError('CPF is required.');
+    if (!patient.email) throw new ValidationError('Email is required.');
+    if (!patient.gender) throw new ValidationError('Gender is required.');
+    if (!patient.birthDate) {
+      throw new ValidationError('Birth date is required.');
+    }
 
     const existingCpf = await find({ cpf: patient.cpf });
     const existingEmail = await find({ email: patient.email });
 
-    if (existingCpf) return { error: 'CPF already registered.' };
-    if (existingEmail) return { error: 'Email already registered.' };
+    if (existingCpf) throw new ValidationError('CPF already registered.');
+    if (existingEmail) throw new ValidationError('Email already registered.');
 
     return app.db('patients').insert(patient, '*');
   };
