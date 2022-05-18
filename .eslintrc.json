@@ -10,6 +10,7 @@
     "sourceType": "module"
   },
   "rules": {
+    "function-paren-newline": "off",
     "prefer-const": "off",
     "implicit-arrow-linebreak": "off",
     "comma-dangle": [
