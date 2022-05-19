@@ -1,5 +1,6 @@
 /* eslint-disable function-paren-newline */
 const request = require('supertest');
+const jwt = require('jwt-simple');
 const app = require('../../src/app');
 
 const MAIN_ROUTE = '/patients';
@@ -15,15 +16,16 @@ const buildCpf = () =>
 // eslint-disable-next-line no-unused-vars
 let user;
 
-// beforeAll(async () => {
-//   const email = `${Date.now()}@email.com`;
-//   const res = await app.services.user.create({
-//     name: 'User Account',
-//     email,
-//     password: '123456',
-//   });
-//   user = { ...res[0] };
-// });
+beforeAll(async () => {
+  const email = buildEmail();
+  const res = await app.services.user.create({
+    name: 'User Account',
+    email,
+    password: '123456',
+  });
+  user = { ...res[0] };
+  user.token = jwt.encode(user, 'Secret!');
+});
 
 it('must create a patient successfully', () =>
   request(app)
@@ -35,6 +37,7 @@ it('must create a patient successfully', () =>
       birthDate: date,
       gender,
     })
+    .set('authorization', `Bearer ${user.token}`)
     .then((result) => {
       expect(result.status).toBe(201);
       expect(result.body.name).toBe('Olivia Vera');
@@ -50,7 +53,9 @@ it('must list all patients', () =>
       birthDate: date,
       gender,
     })
-    .then(() => request(app).get(MAIN_ROUTE))
+    .then(() =>
+      request(app).get(MAIN_ROUTE).set('authorization', `Bearer ${user.token}`)
+    )
     .then((res) => {
       expect(res.status).toBe(200);
       expect(res.body.length).toBeGreaterThan(0);
@@ -69,7 +74,11 @@ it('must list a patient per id', () =>
       },
       ['id']
     )
-    .then((patient) => request(app).get(`${MAIN_ROUTE}/${patient[0].id}`))
+    .then((patient) =>
+      request(app)
+        .get(`${MAIN_ROUTE}/${patient[0].id}`)
+        .set('authorization', `Bearer ${user.token}`)
+    )
     .then((res) => {
       expect(res.status).toBe(200);
     }));
@@ -91,6 +100,7 @@ it('must update a patient', () =>
       request(app)
         .put(`${MAIN_ROUTE}/${patient[0].id}`)
         .send({ name: 'Rafaella Nascimento' })
+        .set('authorization', `Bearer ${user.token}`)
     )
     .then((res) => {
       expect(res.status).toBe(200);
@@ -110,7 +120,11 @@ it('must remove a patient', () =>
       },
       ['id']
     )
-    .then((patient) => request(app).delete(`${MAIN_ROUTE}/${patient[0].id}`))
+    .then((patient) =>
+      request(app)
+        .delete(`${MAIN_ROUTE}/${patient[0].id}`)
+        .set('authorization', `Bearer ${user.token}`)
+    )
     .then((res) => {
       expect(res.status).toBe(204);
     }));
@@ -124,6 +138,7 @@ it('must not create a patient without a name', () =>
       birthDate: date,
       gender,
     })
+    .set('authorization', `Bearer ${user.token}`)
     .then((result) => {
       expect(result.status).toBe(400);
       expect(result.body.error).toBe('Name is required.');
@@ -138,6 +153,7 @@ it('must not create a patient without a cpf', () =>
       birthDate: date,
       gender,
     })
+    .set('authorization', `Bearer ${user.token}`)
     .then((result) => {
       expect(result.status).toBe(400);
       expect(result.body.error).toBe('CPF is required.');
@@ -152,6 +168,7 @@ it('must not create a patient without an email', () =>
       birthDate: date,
       gender,
     })
+    .set('authorization', `Bearer ${user.token}`)
     .then((result) => {
       expect(result.status).toBe(400);
       expect(result.body.error).toBe('Email is required.');
@@ -166,6 +183,7 @@ it('must not create a patient without a birth date', () =>
       email: buildEmail(),
       gender,
     })
+    .set('authorization', `Bearer ${user.token}`)
     .then((result) => {
       expect(result.status).toBe(400);
       expect(result.body.error).toBe('Birth date is required.');
@@ -180,6 +198,7 @@ it('must not create a patient without a gender', () =>
       email: buildEmail(),
       birthDate: date,
     })
+    .set('authorization', `Bearer ${user.token}`)
     .then((result) => {
       expect(result.status).toBe(400);
       expect(result.body.error).toBe('Gender is required.');
@@ -197,6 +216,7 @@ it('must not create a patient with duplicated cpf', () => {
       birthDate: date,
       gender,
     })
+    .set('authorization', `Bearer ${user.token}`)
     .then(
       request(app)
         .post(MAIN_ROUTE)
@@ -207,6 +227,7 @@ it('must not create a patient with duplicated cpf', () => {
           birthDate: date,
           gender,
         })
+        .set('authorization', `Bearer ${user.token}`)
         .then((result) => {
           expect(result.status).toBe(400);
           expect(result.body.error).toBe('CPF already registered.');
@@ -226,6 +247,7 @@ it('must not create a patient with duplicated email', () => {
       birthDate: date,
       gender,
     })
+    .set('authorization', `Bearer ${user.token}`)
     .then(
       request(app)
         .post(MAIN_ROUTE)
@@ -236,6 +258,7 @@ it('must not create a patient with duplicated email', () => {
           birthDate: date,
           gender,
         })
+        .set('authorization', `Bearer ${user.token}`)
         .then((result) => {
           expect(result.status).toBe(400);
           expect(result.body.error).toBe('Email already registered.');

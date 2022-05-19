@@ -26,5 +26,12 @@ module.exports = (app) => {
       })
       .catch((err) => next(err));
   };
-  return { signIn };
+
+  const signUp = (req, res, next) => {
+    app.services.user
+      .create(req.body)
+      .then((result) => res.status(201).json(result[0]))
+      .catch((err) => next(err));
+  };
+  return { signIn, signUp };
 };
