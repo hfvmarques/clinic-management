@@ -3,7 +3,7 @@ const request = require('supertest');
 const jwt = require('jwt-simple');
 const app = require('../../src/app');
 
-const MAIN_ROUTE = '/patients';
+const MAIN_ROUTE = '/api/patients';
 
 const buildEmail = () => `${Date.now()}@email.com`;
 const date = new Date('1952-01-21').toISOString();

@@ -1,12 +1,16 @@
 const request = require('supertest');
 const app = require('../../src/app');
 
+const MAIN_ROUTE = '/auth';
+const SIGNIN_ROUTE = `${MAIN_ROUTE}/signin`;
+const SIGNUP_ROUTE = `${MAIN_ROUTE}/signup`;
+
 const buildEmail = () => `${Date.now()}@email.com`;
 const name = 'Walter White';
 
 it('must create a user via signUp', () =>
   request(app)
-    .post('/auth/signup')
+    .post(SIGNUP_ROUTE)
     .send({
       name,
       email: buildEmail(),
@@ -29,7 +33,7 @@ it('must return a token at login', () => {
       password: '123456',
     })
     .then(() =>
-      request(app).post('/auth/signin').send({
+      request(app).post(SIGNIN_ROUTE).send({
         email,
         password: '123456',
       })
@@ -50,7 +54,7 @@ it('must not return a token with wrong password', () => {
       password: '123456',
     })
     .then(() =>
-      request(app).post('/auth/signin').send({
+      request(app).post(SIGNIN_ROUTE).send({
         email,
         password: '654321',
       })
@@ -63,7 +67,7 @@ it('must not return a token with wrong password', () => {
 
 it('must not return a token with wrong password', () =>
   request(app)
-    .post('/auth/signin')
+    .post(SIGNIN_ROUTE)
     .send({
       email: 'invalid@email.com',
       password: '123456',
@@ -75,7 +79,7 @@ it('must not return a token with wrong password', () =>
 
 it('must not access protected route without a token', () =>
   request(app)
-    .get('/users')
+    .get('/api/users')
     .then((res) => {
       expect(res.status).toBe(401);
     }));

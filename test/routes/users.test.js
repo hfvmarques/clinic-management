@@ -3,6 +3,8 @@ const request = require('supertest');
 
 const app = require('../../src/app');
 
+const MAIN_ROUTE = '/api/users';
+
 const buildEmail = () => `${Date.now()}@email.com`;
 const name = 'Walter White';
 
@@ -21,7 +23,7 @@ beforeAll(async () => {
 
 it('must have status 200', () =>
   request(app)
-    .get('/users')
+    .get(MAIN_ROUTE)
     .set('authorization', `Bearer ${user.token}`)
     .then((res) => {
       expect(res.status).toBe(200);
@@ -29,7 +31,7 @@ it('must have status 200', () =>
 
 it('must create a user', () =>
   request(app)
-    .post('/users')
+    .post(MAIN_ROUTE)
     .send({
       name,
       email: buildEmail(),
@@ -43,7 +45,7 @@ it('must create a user', () =>
 
 it('must not return user password in body response', () =>
   request(app)
-    .post('/users')
+    .post(MAIN_ROUTE)
     .send({
       name,
       email: buildEmail(),
@@ -56,7 +58,7 @@ it('must not return user password in body response', () =>
 
 it('must store crypto password', async () => {
   const res = await request(app)
-    .post('/users')
+    .post(MAIN_ROUTE)
     .send({
       name,
       email: buildEmail(),
@@ -75,7 +77,7 @@ it('must store crypto password', async () => {
 
 it('must list one user', () =>
   request(app)
-    .get('/users')
+    .get(MAIN_ROUTE)
     .set('authorization', `Bearer ${user.token}`)
     .then((res) => {
       expect(res.body.length).toBeGreaterThan(0);
@@ -83,7 +85,7 @@ it('must list one user', () =>
 
 it('must list user prop', () =>
   request(app)
-    .get('/users')
+    .get(MAIN_ROUTE)
     .set('authorization', `Bearer ${user.token}`)
     .then((res) => {
       expect(res.body[0]).toHaveProperty('name');
@@ -92,7 +94,7 @@ it('must list user prop', () =>
 
 it('must not create a user without a name', () =>
   request(app)
-    .post('/users')
+    .post(MAIN_ROUTE)
     .send({
       email: buildEmail(),
       password: '123456',
@@ -105,7 +107,7 @@ it('must not create a user without a name', () =>
 
 it('must not create a user without an email', async () => {
   const result = await request(app)
-    .post('/users')
+    .post(MAIN_ROUTE)
     .send({
       name,
       password: '123456',
@@ -117,7 +119,7 @@ it('must not create a user without an email', async () => {
 
 it('must not create a user without a password', (done) => {
   request(app)
-    .post('/users')
+    .post(MAIN_ROUTE)
     .send({
       name,
       email: buildEmail(),
@@ -134,7 +136,7 @@ it('must not create a user with an existing email', () => {
   const sameEmail = 'walter@white.com';
 
   return request(app)
-    .post('/users')
+    .post(MAIN_ROUTE)
     .send({
       name,
       email: sameEmail,
@@ -143,7 +145,7 @@ it('must not create a user with an existing email', () => {
     .set('authorization', `Bearer ${user.token}`)
     .then(
       request(app)
-        .post('/users')
+        .post(MAIN_ROUTE)
         .send({
           name,
           email: sameEmail,
