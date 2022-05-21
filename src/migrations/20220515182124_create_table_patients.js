@@ -9,7 +9,7 @@ exports.up = (knex) =>
     table.string('name').notNullable();
     table.string('email').notNullable().unique();
     table.dateTime('birthDate').notNullable();
-    table.string('gender').notNullable();
+    table.enum('gender', ['F', 'M', 'O']);
     table.timestamps(true, true);
   });
 
