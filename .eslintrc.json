@@ -16,7 +16,8 @@
     "comma-dangle": [
       "error",
       {
-        "objects": "ignore"
+        "objects": "ignore",
+        "arrays": "ignore"
       }
     ]
   }

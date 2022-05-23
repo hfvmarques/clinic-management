@@ -37,5 +37,12 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
+  router.get('/:id/phones', (req, res, next) => {
+    app.services.patient_phone
+      .find(req.params.id)
+      .then((result) => res.status(200).json(result))
+      .catch((err) => next(err));
+  });
+
   return router;
 };
