@@ -7,5 +7,8 @@ module.exports = (app) => {
       .where(filter)
       .select();
 
-  return { find };
+  const create = async (patientPhone) =>
+    app.db('patient_phones').insert(patientPhone, '*');
+
+  return { find, create };
 };

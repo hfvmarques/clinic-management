@@ -44,5 +44,12 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
+  router.post('/:id/phones', (req, res, next) => {
+    app.services.patient_phone
+      .create(req.body)
+      .then((result) => res.status(201).json(result[0]))
+      .catch((err) => next(err));
+  });
+
   return router;
 };

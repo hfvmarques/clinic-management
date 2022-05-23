@@ -25,6 +25,7 @@ beforeAll(async () => {
   });
   user = { ...res[0] };
   user.token = jwt.encode(user, 'Secret!');
+  delete user.password;
 });
 
 it('must create a patient successfully', () =>

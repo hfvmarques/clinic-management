@@ -7,7 +7,6 @@ const MAIN_ROUTE = '/api/patients';
 const buildEmail = () => `${Date.now()}@email.com`;
 const date = new Date('1999-02-23').toISOString();
 const name = 'Bento Gabriel Costa';
-const password = '$2b$10$PcM8ybKXPN1RnivB8rxuQ.GmbF1xA7/CDPSl1gkUNKPsyVVMVwapW';
 const gender = 'M';
 
 const buildCpf = () =>
@@ -21,45 +20,49 @@ let patient;
 let otherPatient;
 
 beforeAll(async () => {
-  await app.db('patient_phones').del();
-  await app.db('patients').del();
-  await app.db('users').del();
-
-  const createdUser = await app.db('users').insert(
-    {
-      name: 'User Account',
-      email: buildEmail(),
-      password,
-    },
-    '*'
-  );
-
-  [user] = createdUser;
-  delete user.password;
+  const email = buildEmail();
+  const userRes = await app.services.user.create({
+    name: 'User Account',
+    email,
+    password: '123456',
+  });
+  user = { ...userRes[0] };
   user.token = jwt.encode(user, 'Secret!');
+  delete user.password;
 
-  const patients = await app.db('patients').insert(
-    [
-      {
-        cpf: buildCpf(),
-        name,
-        email: 'patientEmail@email.com',
-        birthDate: date,
-        gender,
-      },
-      {
-        cpf: buildCpf(),
-        name,
-        email: 'otherPatientEmail@email.com',
-        birthDate: date,
-        gender,
-      },
-    ],
-    '*'
-  );
+  const patientRes = await app.services.patient.create({
+    cpf: buildCpf(),
+    name,
+    email: buildEmail(),
+    birthDate: date,
+    gender,
+  });
+  patient = { ...patientRes[0] };
 
-  [patient, otherPatient] = patients;
+  const otherPatientRes = await app.services.patient.create({
+    cpf: buildCpf(),
+    name,
+    email: buildEmail(),
+    birthDate: date,
+    gender,
+  });
+  otherPatient = { ...otherPatientRes[0] };
 });
+
+it('must create a patient phone successfully', () =>
+  request(app)
+    .post(`${MAIN_ROUTE}/${patient.id}/phones`)
+    .send({
+      patientId: patient.id,
+      countryCode: '55',
+      phone: buildPhone(),
+      primary: false,
+    })
+    .set('authorization', `Bearer ${user.token}`)
+    .then((result) => {
+      expect(result.status).toBe(201);
+      expect(result.body.patientId).toBe(patient.id);
+    }));
 
 it('must list only the patient phones', () =>
   app
@@ -80,7 +83,7 @@ it('must list only the patient phones', () =>
     ])
     .then(() =>
       request(app)
-        .get(`${MAIN_ROUTE}/${patient.id}/phones`)
+        .get(`${MAIN_ROUTE}/${otherPatient.id}/phones`)
         .set('authorization', `Bearer ${user.token}`)
     )
     .then((res) => {
