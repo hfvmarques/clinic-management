@@ -7,8 +7,11 @@ module.exports = (app) => {
       .where(filter)
       .select();
 
+  const findById = (patientId, phoneId) =>
+    app.db('patient_phones').where({ patientId, id: phoneId }).first();
+
   const create = async (patientPhone) =>
     app.db('patient_phones').insert(patientPhone, '*');
 
-  return { find, create };
+  return { find, findById, create };
 };

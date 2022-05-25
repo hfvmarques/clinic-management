@@ -51,5 +51,12 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
+  router.get('/:id/phones/:phoneId', (req, res, next) => {
+    app.services.patient_phone
+      .findById(req.params.id, req.params.phoneId)
+      .then((result) => res.status(200).json(result))
+      .catch((err) => next(err));
+  });
+
   return router;
 };
