@@ -65,5 +65,12 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
+  router.delete('/:id/phones/:phoneId', (req, res, next) => {
+    app.services.patient_phone
+      .remove(req.params.id, req.params.phoneId)
+      .then(() => res.status(204).send())
+      .catch((err) => next(err));
+  });
+
   return router;
 };

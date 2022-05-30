@@ -135,3 +135,24 @@ it('must update a patient phone', () =>
       expect(res.status).toBe(200);
       expect(res.body.primary).toBe(true);
     }));
+
+it('must delete a patient phone', () =>
+  app
+    .db('patient_phones')
+    .insert(
+      {
+        patientId: patient.id,
+        countryCode: '55',
+        phone: buildPhone(),
+        primary: false,
+      },
+      ['id']
+    )
+    .then((result) =>
+      request(app)
+        .delete(`${MAIN_ROUTE}/${patient.id}/phones/${result[0].id}`)
+        .set('authorization', `Bearer ${user.token}`)
+    )
+    .then((res) => {
+      expect(res.status).toBe(204);
+    }));
