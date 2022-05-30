@@ -13,5 +13,16 @@ module.exports = (app) => {
   const create = async (patientPhone) =>
     app.db('patient_phones').insert(patientPhone, '*');
 
-  return { find, findById, create };
+  const update = (patientId, phoneId, data) =>
+    app
+      .db('patient_phones')
+      .where({ patientId, id: phoneId })
+      .update(data, '*');
+
+  return {
+    find,
+    findById,
+    create,
+    update,
+  };
 };

@@ -49,6 +49,33 @@ beforeAll(async () => {
   otherPatient = { ...otherPatientRes[0] };
 });
 
+it('must list only the patient phones', () =>
+  app
+    .db('patient_phones')
+    .insert([
+      {
+        patientId: patient.id,
+        countryCode: '55',
+        phone: buildPhone(),
+        primary: true,
+      },
+      {
+        patientId: otherPatient.id,
+        countryCode: '55',
+        phone: buildPhone(),
+        primary: true,
+      },
+    ])
+    .then(() =>
+      request(app)
+        .get(`${MAIN_ROUTE}/${otherPatient.id}/phones`)
+        .set('authorization', `Bearer ${user.token}`)
+    )
+    .then((res) => {
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBe(1);
+    }));
+
 it('must create a patient phone successfully', () =>
   request(app)
     .post(`${MAIN_ROUTE}/${patient.id}/phones`)
@@ -86,29 +113,25 @@ it('must return a patient phone by id', () =>
         })
     ));
 
-it('must list only the patient phones', () =>
+it('must update a patient phone', () =>
   app
     .db('patient_phones')
-    .insert([
+    .insert(
       {
         patientId: patient.id,
         countryCode: '55',
         phone: buildPhone(),
-        primary: true,
+        primary: false,
       },
-      {
-        patientId: otherPatient.id,
-        countryCode: '55',
-        phone: buildPhone(),
-        primary: true,
-      },
-    ])
-    .then(() =>
+      ['id']
+    )
+    .then((result) =>
       request(app)
-        .get(`${MAIN_ROUTE}/${otherPatient.id}/phones`)
+        .put(`${MAIN_ROUTE}/${patient.id}/phones/${result[0].id}`)
+        .send({ primary: true })
         .set('authorization', `Bearer ${user.token}`)
     )
     .then((res) => {
       expect(res.status).toBe(200);
-      expect(res.body.length).toBe(1);
+      expect(res.body.primary).toBe(true);
     }));

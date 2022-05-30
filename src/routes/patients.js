@@ -58,5 +58,12 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
+  router.put('/:id/phones/:phoneId', (req, res, next) => {
+    app.services.patient_phone
+      .update(req.params.id, req.params.phoneId, req.body)
+      .then((result) => res.status(200).json(result[0]))
+      .catch((err) => next(err));
+  });
+
   return router;
 };
