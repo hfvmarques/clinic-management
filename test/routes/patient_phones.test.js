@@ -91,6 +91,34 @@ it('must create a patient phone successfully', () =>
       expect(result.body.patientId).toBe(patient.id);
     }));
 
+it('must create a patient phone without a countryCode', () =>
+  request(app)
+    .post(`${MAIN_ROUTE}/${patient.id}/phones`)
+    .send({
+      patientId: patient.id,
+      phone: buildPhone(),
+      primary: false,
+    })
+    .set('authorization', `Bearer ${user.token}`)
+    .then((result) => {
+      expect(result.status).toBe(201);
+      expect(result.body.countryCode).toBe('55');
+    }));
+
+it('must create a patient phone without a primary selection', () =>
+  request(app)
+    .post(`${MAIN_ROUTE}/${patient.id}/phones`)
+    .send({
+      patientId: patient.id,
+      countryCode: '55',
+      phone: buildPhone(),
+    })
+    .set('authorization', `Bearer ${user.token}`)
+    .then((result) => {
+      expect(result.status).toBe(201);
+      expect(result.body.primary).toBe(false);
+    }));
+
 it('must return a patient phone by id', () =>
   app
     .db('patient_phones')
@@ -155,4 +183,32 @@ it('must delete a patient phone', () =>
     )
     .then((res) => {
       expect(res.status).toBe(204);
+    }));
+
+it('must not create a patient phone without a phone number', () =>
+  request(app)
+    .post(`${MAIN_ROUTE}/${patient.id}/phones`)
+    .send({
+      patientId: patient.id,
+      countryCode: '55',
+      primary: false,
+    })
+    .set('authorization', `Bearer ${user.token}`)
+    .then((res) => {
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('Phone number is required.');
+    }));
+
+it('must not create a patient phone without a patientId', () =>
+  request(app)
+    .post(`${MAIN_ROUTE}/${patient.id}/phones`)
+    .send({
+      countryCode: '55',
+      phone: buildPhone(),
+      primary: false,
+    })
+    .set('authorization', `Bearer ${user.token}`)
+    .then((res) => {
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('Patient is required.');
     }));
