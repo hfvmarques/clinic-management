@@ -76,48 +76,51 @@ it('must list only the patient phones', () =>
       expect(res.body.length).toBe(1);
     }));
 
-it('must create a patient phone successfully', () =>
-  request(app)
-    .post(`${MAIN_ROUTE}/${patient.id}/phones`)
-    .send({
+describe('when creating a patient phone', () => {
+  let validPatientPhone;
+  beforeAll(() => {
+    validPatientPhone = {
       patientId: patient.id,
       countryCode: '55',
       phone: buildPhone(),
       primary: false,
-    })
-    .set('authorization', `Bearer ${user.token}`)
-    .then((result) => {
-      expect(result.status).toBe(201);
-      expect(result.body.patientId).toBe(patient.id);
-    }));
+    };
+  });
 
-it('must create a patient phone without a countryCode', () =>
-  request(app)
-    .post(`${MAIN_ROUTE}/${patient.id}/phones`)
-    .send({
-      patientId: patient.id,
-      phone: buildPhone(),
-      primary: false,
-    })
-    .set('authorization', `Bearer ${user.token}`)
-    .then((result) => {
-      expect(result.status).toBe(201);
-      expect(result.body.countryCode).toBe('55');
-    }));
+  const validCreationTemplate = (validData, attribute, value) =>
+    request(app)
+      .post(`${MAIN_ROUTE}/${patient.id}/phones`)
+      .send({ ...validPatientPhone, ...validData })
+      .set('authorization', `Bearer ${user.token}`)
+      .then((res) => {
+        expect(res.status).toBe(201);
+        expect(res.body[attribute]).toBe(value);
+      });
 
-it('must create a patient phone without a primary selection', () =>
-  request(app)
-    .post(`${MAIN_ROUTE}/${patient.id}/phones`)
-    .send({
-      patientId: patient.id,
-      countryCode: '55',
-      phone: buildPhone(),
-    })
-    .set('authorization', `Bearer ${user.token}`)
-    .then((result) => {
-      expect(result.status).toBe(201);
-      expect(result.body.primary).toBe(false);
-    }));
+  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+    request(app)
+      .post(`${MAIN_ROUTE}/${patient.id}/phones`)
+      .send({ ...validPatientPhone, ...invalidData })
+      .set('authorization', `Bearer ${user.token}`)
+      .then((res) => {
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe(validationErrorMessage);
+      });
+
+  it('must create with all attributes', () => validCreationTemplate());
+
+  it('must create without a primary selection', () =>
+    validCreationTemplate({ primary: undefined }, 'primary', false));
+
+  it('must create without a country code', () =>
+    validCreationTemplate({ countryCode: undefined }, 'countryCode', '55'));
+
+  it('must not create without a phone number', () =>
+    invalidCreationTemplate({ phone: undefined }, 'Phone number is required.'));
+
+  it('must not create without a patientId', () =>
+    invalidCreationTemplate({ patientId: undefined }, 'Patient is required.'));
+});
 
 it('must return a patient phone by id', () =>
   app
@@ -183,32 +186,4 @@ it('must delete a patient phone', () =>
     )
     .then((res) => {
       expect(res.status).toBe(204);
-    }));
-
-it('must not create a patient phone without a phone number', () =>
-  request(app)
-    .post(`${MAIN_ROUTE}/${patient.id}/phones`)
-    .send({
-      patientId: patient.id,
-      countryCode: '55',
-      primary: false,
-    })
-    .set('authorization', `Bearer ${user.token}`)
-    .then((res) => {
-      expect(res.status).toBe(400);
-      expect(res.body.error).toBe('Phone number is required.');
-    }));
-
-it('must not create a patient phone without a patientId', () =>
-  request(app)
-    .post(`${MAIN_ROUTE}/${patient.id}/phones`)
-    .send({
-      countryCode: '55',
-      phone: buildPhone(),
-      primary: false,
-    })
-    .set('authorization', `Bearer ${user.token}`)
-    .then((res) => {
-      expect(res.status).toBe(400);
-      expect(res.body.error).toBe('Patient is required.');
     }));
