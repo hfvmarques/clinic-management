@@ -110,7 +110,7 @@ describe('when creating a patient phone', () => {
   it('must create with all attributes', () => validCreationTemplate());
 
   it('must create without a primary selection', () =>
-    validCreationTemplate({ primary: undefined }, 'primary', false));
+    validCreationTemplate({ primary: undefined }, 'primary', true));
 
   it('must create without a country code', () =>
     validCreationTemplate({ countryCode: undefined }, 'countryCode', '55'));

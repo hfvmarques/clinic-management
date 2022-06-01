@@ -12,7 +12,7 @@ exports.up = (knex) =>
       .notNullable();
     table.string('countryCode').notNullable().defaultTo('55');
     table.string('phone').notNullable();
-    table.boolean('primary').notNullable().defaultTo(false);
+    table.boolean('primary').notNullable().defaultTo(true);
     table.timestamps(true, true);
   });
 
