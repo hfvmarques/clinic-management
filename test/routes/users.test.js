@@ -92,44 +92,34 @@ it('must list user prop', () =>
       expect(res.body[0]).toHaveProperty('email');
     }));
 
-it('must not create a user without a name', () =>
-  request(app)
-    .post(MAIN_ROUTE)
-    .send({
-      email: buildEmail(),
-      password: '123456',
-    })
-    .set('authorization', `Bearer ${user.token}`)
-    .then((res) => {
-      expect(res.status).toBe(400);
-      expect(res.body.error).toBe('Name is required.');
-    }));
-
-it('must not create a user without an email', async () => {
-  const result = await request(app)
-    .post(MAIN_ROUTE)
-    .send({
-      name,
-      password: '123456',
-    })
-    .set('authorization', `Bearer ${user.token}`);
-  expect(result.status).toBe(400);
-  expect(result.body.error).toBe('Email is required.');
-});
-
-it('must not create a user without a password', (done) => {
-  request(app)
-    .post(MAIN_ROUTE)
-    .send({
+describe('when creating a user', () => {
+  let validUser;
+  beforeAll(() => {
+    validUser = {
       name,
       email: buildEmail(),
-    })
-    .set('authorization', `Bearer ${user.token}`)
-    .then((res) => {
-      expect(res.status).toBe(400);
-      expect(res.body.error).toBe('Password is required.');
-      done();
-    });
+      password: '123456',
+    };
+  });
+
+  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+    request(app)
+      .post(MAIN_ROUTE)
+      .send({ ...validUser, ...invalidData })
+      .set('authorization', `Bearer ${user.token}`)
+      .then((res) => {
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe(validationErrorMessage);
+      });
+
+  it('must not create without a name', () =>
+    invalidCreationTemplate({ name: undefined }, 'Name is required.'));
+
+  it('must not create without a email', () =>
+    invalidCreationTemplate({ email: undefined }, 'Email is required.'));
+
+  it('must not create without a password', () =>
+    invalidCreationTemplate({ password: undefined }, 'Password is required.'));
 });
 
 it('must not create a user with an existing email', () => {
