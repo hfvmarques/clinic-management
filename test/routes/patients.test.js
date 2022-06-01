@@ -13,7 +13,6 @@ const gender = 'F';
 const buildCpf = () =>
   Math.floor(Math.random() * (99999999999 - 10000000000 + 1)) + 10000000000;
 
-// eslint-disable-next-line no-unused-vars
 let user;
 
 beforeAll(async () => {
@@ -130,80 +129,52 @@ it('must remove a patient', () =>
       expect(res.status).toBe(204);
     }));
 
-it('must not create a patient without a name', () =>
-  request(app)
-    .post(MAIN_ROUTE)
-    .send({
-      cpf: buildCpf(),
-      email: buildEmail(),
-      birthDate: date,
-      gender,
-    })
-    .set('authorization', `Bearer ${user.token}`)
-    .then((result) => {
-      expect(result.status).toBe(400);
-      expect(result.body.error).toBe('Name is required.');
-    }));
-
-it('must not create a patient without a cpf', () =>
-  request(app)
-    .post(MAIN_ROUTE)
-    .send({
-      name,
-      email: buildEmail(),
-      birthDate: date,
-      gender,
-    })
-    .set('authorization', `Bearer ${user.token}`)
-    .then((result) => {
-      expect(result.status).toBe(400);
-      expect(result.body.error).toBe('CPF is required.');
-    }));
-
-it('must not create a patient without an email', () =>
-  request(app)
-    .post(MAIN_ROUTE)
-    .send({
-      cpf: buildCpf(),
-      name,
-      birthDate: date,
-      gender,
-    })
-    .set('authorization', `Bearer ${user.token}`)
-    .then((result) => {
-      expect(result.status).toBe(400);
-      expect(result.body.error).toBe('Email is required.');
-    }));
-
-it('must not create a patient without a birth date', () =>
-  request(app)
-    .post(MAIN_ROUTE)
-    .send({
-      cpf: buildCpf(),
-      name,
-      email: buildEmail(),
-      gender,
-    })
-    .set('authorization', `Bearer ${user.token}`)
-    .then((result) => {
-      expect(result.status).toBe(400);
-      expect(result.body.error).toBe('Birth date is required.');
-    }));
-
-it('must not create a patient without a gender', () =>
-  request(app)
-    .post(MAIN_ROUTE)
-    .send({
+describe('when creating a patient', () => {
+  let validPatient;
+  beforeAll(() => {
+    validPatient = {
       cpf: buildCpf(),
       name,
       email: buildEmail(),
       birthDate: date,
-    })
-    .set('authorization', `Bearer ${user.token}`)
-    .then((result) => {
-      expect(result.status).toBe(400);
-      expect(result.body.error).toBe('Gender is required.');
-    }));
+      gender,
+    };
+  });
+
+  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+    request(app)
+      .post(MAIN_ROUTE)
+      .send({ ...validPatient, ...invalidData })
+      .set('authorization', `Bearer ${user.token}`)
+      .then((res) => {
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe(validationErrorMessage);
+      });
+
+  it('must not create without a name', () =>
+    invalidCreationTemplate({ name: undefined }, 'Name is required.'));
+
+  it('must not create without a cpf', () =>
+    invalidCreationTemplate({ cpf: undefined }, 'CPF is required.'));
+
+  it('must not create without an email', () =>
+    invalidCreationTemplate({ email: undefined }, 'Email is required.'));
+
+  it('must not create without a gender', () =>
+    invalidCreationTemplate({ gender: undefined }, 'Gender is required.'));
+
+  it('must not create with an invalid gender', () =>
+    invalidCreationTemplate(
+      { gender: 'X' },
+      'Gender must be F (female), M (male) or O (other)'
+    ));
+
+  it('must not create without a birthDate', () =>
+    invalidCreationTemplate(
+      { birthDate: undefined },
+      'Birth date is required.'
+    ));
+});
 
 it('must not create a patient with duplicated cpf', () => {
   const duplicatedCpf = '12345678910';

@@ -14,6 +14,16 @@ module.exports = (app) => {
       throw new ValidationError('Birth date is required.');
     }
 
+    if (
+      patient.gender !== 'F' &&
+      patient.gender !== 'M' &&
+      patient.gender !== 'O'
+    ) {
+      throw new ValidationError(
+        'Gender must be F (female), M (male) or O (other)'
+      );
+    }
+
     const existingCpf = await find({ cpf: patient.cpf });
     const existingEmail = await find({ email: patient.email });
 
