@@ -86,5 +86,19 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
+  router.get('/:id/addresses/:addressId', (req, res, next) => {
+    app.services.patient_address
+      .findById(req.params.id, req.params.addressId)
+      .then((result) => res.status(200).json(result))
+      .catch((err) => next(err));
+  });
+
+  router.put('/:id/addresses/:addressId', (req, res, next) => {
+    app.services.patient_address
+      .update(req.params.id, req.params.addressId, req.body)
+      .then((result) => res.status(200).json(result[0]))
+      .catch((err) => next(err));
+  });
+
   return router;
 };
