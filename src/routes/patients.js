@@ -72,5 +72,19 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
+  router.get('/:id/addresses', (req, res, next) => {
+    app.services.patient_address
+      .find(req.params.id)
+      .then((result) => res.status(200).json(result))
+      .catch((err) => next(err));
+  });
+
+  router.post('/:id/addresses', (req, res, next) => {
+    app.services.patient_address
+      .create(req.body)
+      .then((result) => res.status(201).json(result[0]))
+      .catch((err) => next(err));
+  });
+
   return router;
 };

@@ -2,12 +2,7 @@ const ValidationError = require('../errors/ValidationError');
 
 module.exports = (app) => {
   const find = (patientId, filter = {}) =>
-    app
-      .db('patient_phones')
-      .join('patients', 'patients.id', 'patient_phones.patientId')
-      .where({ patientId })
-      .where(filter)
-      .select();
+    app.db('patient_phones').where({ patientId }).where(filter).select();
 
   const findById = (patientId, phoneId) =>
     app.db('patient_phones').where({ patientId, id: phoneId }).first();
