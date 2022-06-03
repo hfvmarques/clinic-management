@@ -122,6 +122,15 @@ describe('when creating a patient phone', () => {
     invalidCreationTemplate({ patientId: undefined }, 'Patient is required.'));
 });
 
+it('must return a patient phone', () =>
+  request(app)
+    .get(`${MAIN_ROUTE}/${patient.id}/phones`)
+    .set('authorization', `Bearer ${user.token}`)
+    .then((res) => {
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBeGreaterThan(0);
+    }));
+
 it('must return a patient phone by id', () =>
   app
     .db('patient_phones')
