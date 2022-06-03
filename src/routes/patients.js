@@ -100,5 +100,12 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
+  router.delete('/:id/addresses/:addressId', (req, res, next) => {
+    app.services.patient_address
+      .remove(req.params.id, req.params.addressId)
+      .then(() => res.status(204).send())
+      .catch((err) => next(err));
+  });
+
   return router;
 };

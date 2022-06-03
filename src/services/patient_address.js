@@ -30,5 +30,8 @@ module.exports = (app) => {
       .where({ patientId, id: addressId })
       .update(data, '*');
 
-  return { find, findById, create, update };
+  const remove = (patientId, addressId) =>
+    app.db('patient_addresses').where({ patientId, id: addressId }).del();
+
+  return { find, findById, create, update, remove };
 };

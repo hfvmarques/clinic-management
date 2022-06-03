@@ -15,7 +15,6 @@ const buildCpf = () =>
 let user;
 let patient;
 let otherPatient;
-let address;
 
 beforeAll(async () => {
   const email = buildEmail();
@@ -212,4 +211,30 @@ it('must update a patient address', () =>
     .then((res) => {
       expect(res.status).toBe(200);
       expect(res.body.primary).toBe(false);
+    }));
+
+it('must delete a patient address', () =>
+  app
+    .db('patient_addresses')
+    .insert(
+      {
+        patientId: patient.id,
+        street: 'Alameda Sergio Manesque',
+        number: '891',
+        complement: 'Apto 13',
+        district: 'Jaderlândia',
+        zipCode: '68746427',
+        city: 'Castanhal',
+        state: 'PA',
+        primary: true,
+      },
+      ['id']
+    )
+    .then((result) =>
+      request(app)
+        .delete(`${MAIN_ROUTE}/${patient.id}/addresses/${result[0].id}`)
+        .set('authorization', `Bearer ${user.token}`)
+    )
+    .then((res) => {
+      expect(res.status).toBe(204);
     }));
