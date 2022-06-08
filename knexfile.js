@@ -8,8 +8,7 @@ module.exports = {
       password: 'postgres',
       database: 'clinic_management',
     },
-    migrations: {
-      directory: './src/migrations',
-    },
+    migrations: { directory: './src/migrations' },
+    seeds: { directory: './src/seeds' },
   },
 };
