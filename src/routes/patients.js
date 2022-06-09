@@ -107,5 +107,40 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
+  router.get('/:id/insurances', (req, res, next) => {
+    app.services.patient_health_insurance
+      .find(req.params.id)
+      .then((result) => res.status(200).json(result))
+      .catch((err) => next(err));
+  });
+
+  router.post('/:id/insurances', (req, res, next) => {
+    app.services.patient_health_insurance
+      .create(req.body)
+      .then((result) => res.status(201).json(result[0]))
+      .catch((err) => next(err));
+  });
+
+  router.get('/:id/insurances/:insuranceId', (req, res, next) => {
+    app.services.patient_health_insurance
+      .findById(req.params.id, req.params.insuranceId)
+      .then((result) => res.status(200).json(result))
+      .catch((err) => next(err));
+  });
+
+  router.put('/:id/insurances/:insuranceId', (req, res, next) => {
+    app.services.patient_health_insurance
+      .update(req.params.id, req.params.insuranceId, req.body)
+      .then((result) => res.status(200).json(result[0]))
+      .catch((err) => next(err));
+  });
+
+  router.delete('/:id/insurances/:insuranceId', (req, res, next) => {
+    app.services.patient_health_insurance
+      .remove(req.params.id, req.params.insuranceId)
+      .then(() => res.status(204).send())
+      .catch((err) => next(err));
+  });
+
   return router;
 };
