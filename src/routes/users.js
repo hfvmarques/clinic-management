@@ -3,6 +3,13 @@ const express = require('express');
 module.exports = (app) => {
   const router = express.Router();
 
+  const validate = (req, res, next) => {
+    app.services.user
+      .validate(req.body)
+      .then(() => next())
+      .catch((err) => next(err));
+  };
+
   router.get('/', (req, res, next) =>
     app.services.user
       .findAll()
@@ -10,7 +17,7 @@ module.exports = (app) => {
       .catch((err) => next(err))
   );
 
-  router.post('/', async (req, res, next) => {
+  router.post('/', validate, async (req, res, next) => {
     try {
       const result = await app.services.user.create(req.body);
 

@@ -3,13 +3,41 @@ const express = require('express');
 module.exports = (app) => {
   const router = express.Router();
 
+  const validatePatient = (req, res, next) => {
+    app.services.patient
+      .validate(req.body)
+      .then(() => next())
+      .catch((err) => next(err));
+  };
+
+  const validatePatientPhone = (req, res, next) => {
+    app.services.patient_phone
+      .validate(req.body)
+      .then(() => next())
+      .catch((err) => next(err));
+  };
+
+  const validatePatientAddress = (req, res, next) => {
+    app.services.patient_address
+      .validate(req.body)
+      .then(() => next())
+      .catch((err) => next(err));
+  };
+
+  const validatePatientHealthInsurance = (req, res, next) => {
+    app.services.patient_health_insurance
+      .validate(req.body)
+      .then(() => next())
+      .catch((err) => next(err));
+  };
+
   router.get('/', (req, res) => {
     app.services.patient
       .findAll()
       .then((result) => res.status(200).json(result));
   });
 
-  router.post('/', (req, res, next) => {
+  router.post('/', validatePatient, (req, res, next) => {
     app.services.patient
       .create(req.body)
       .then((result) => res.status(201).json(result[0]))
@@ -23,7 +51,7 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
-  router.put('/:id', (req, res, next) => {
+  router.put('/:id', validatePatient, (req, res, next) => {
     app.services.patient
       .update(req.params.id, req.body)
       .then((result) => res.status(200).json(result[0]))
@@ -44,7 +72,7 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
-  router.post('/:id/phones', (req, res, next) => {
+  router.post('/:id/phones', validatePatientPhone, (req, res, next) => {
     app.services.patient_phone
       .create(req.body)
       .then((result) => res.status(201).json(result[0]))
@@ -58,7 +86,7 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
-  router.put('/:id/phones/:phoneId', (req, res, next) => {
+  router.put('/:id/phones/:phoneId', validatePatientPhone, (req, res, next) => {
     app.services.patient_phone
       .update(req.params.id, req.params.phoneId, req.body)
       .then((result) => res.status(200).json(result[0]))
@@ -79,7 +107,7 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
-  router.post('/:id/addresses', (req, res, next) => {
+  router.post('/:id/addresses', validatePatientAddress, (req, res, next) => {
     app.services.patient_address
       .create(req.body)
       .then((result) => res.status(201).json(result[0]))
@@ -93,12 +121,16 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
-  router.put('/:id/addresses/:addressId', (req, res, next) => {
-    app.services.patient_address
-      .update(req.params.id, req.params.addressId, req.body)
-      .then((result) => res.status(200).json(result[0]))
-      .catch((err) => next(err));
-  });
+  router.put(
+    '/:id/addresses/:addressId',
+    validatePatientAddress,
+    (req, res, next) => {
+      app.services.patient_address
+        .update(req.params.id, req.params.addressId, req.body)
+        .then((result) => res.status(200).json(result[0]))
+        .catch((err) => next(err));
+    }
+  );
 
   router.delete('/:id/addresses/:addressId', (req, res, next) => {
     app.services.patient_address
@@ -114,12 +146,16 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
-  router.post('/:id/insurances', (req, res, next) => {
-    app.services.patient_health_insurance
-      .create(req.body)
-      .then((result) => res.status(201).json(result[0]))
-      .catch((err) => next(err));
-  });
+  router.post(
+    '/:id/insurances',
+    validatePatientHealthInsurance,
+    (req, res, next) => {
+      app.services.patient_health_insurance
+        .create(req.body)
+        .then((result) => res.status(201).json(result[0]))
+        .catch((err) => next(err));
+    }
+  );
 
   router.get('/:id/insurances/:insuranceId', (req, res, next) => {
     app.services.patient_health_insurance
@@ -128,12 +164,16 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
-  router.put('/:id/insurances/:insuranceId', (req, res, next) => {
-    app.services.patient_health_insurance
-      .update(req.params.id, req.params.insuranceId, req.body)
-      .then((result) => res.status(200).json(result[0]))
-      .catch((err) => next(err));
-  });
+  router.put(
+    '/:id/insurances/:insuranceId',
+    validatePatientHealthInsurance,
+    (req, res, next) => {
+      app.services.patient_health_insurance
+        .update(req.params.id, req.params.insuranceId, req.body)
+        .then((result) => res.status(200).json(result[0]))
+        .catch((err) => next(err));
+    }
+  );
 
   router.delete('/:id/insurances/:insuranceId', (req, res, next) => {
     app.services.patient_health_insurance

@@ -6,8 +6,6 @@ module.exports = (app) => {
   const find = (filter = {}) => app.db('patients').where(filter).first();
 
   const create = async (patient) => {
-    await validate(patient);
-
     const existingCpf = await find({ cpf: patient.cpf });
     const existingEmail = await find({ email: patient.email });
 
@@ -17,11 +15,8 @@ module.exports = (app) => {
     return app.db('patients').insert(patient, '*');
   };
 
-  const update = async (id, patient) => {
-    await validate(patient);
-
+  const update = async (id, patient) =>
     app.db('patients').where({ id }).update(patient, '*');
-  };
 
   const remove = (id) => app.db('patients').where({ id }).del();
 
@@ -51,5 +46,6 @@ module.exports = (app) => {
     create,
     update,
     remove,
+    validate,
   };
 };

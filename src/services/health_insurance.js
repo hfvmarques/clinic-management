@@ -7,8 +7,6 @@ module.exports = (app) => {
     app.db('health_insurances').where(filter).first();
 
   const create = async (health_insurance) => {
-    await validate(health_insurance);
-
     const existingAnsRecord = await find({
       ansRecord: health_insurance.ansRecord,
     });
@@ -19,14 +17,8 @@ module.exports = (app) => {
     return app.db('health_insurances').insert(health_insurance, '*');
   };
 
-  const update = async (id, health_insurance) => {
-    await validate(health_insurance);
-
-    return app
-      .db('health_insurances')
-      .where({ id })
-      .update(health_insurance, '*');
-  };
+  const update = async (id, health_insurance) =>
+    app.db('health_insurances').where({ id }).update(health_insurance, '*');
 
   const remove = (id) => app.db('health_insurances').where({ id }).del();
 
@@ -38,5 +30,5 @@ module.exports = (app) => {
       throw new ValidationError('ANS record is required.');
   };
 
-  return { findAll, find, create, update, remove };
+  return { findAll, find, create, update, remove, validate };
 };

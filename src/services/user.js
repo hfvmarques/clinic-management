@@ -14,8 +14,6 @@ module.exports = (app) => {
   const find = (filter = {}) => app.db('users').where(filter).first();
 
   const create = async (user) => {
-    await validate(user);
-
     const existingUser = await find({ email: user.email });
 
     if (existingUser) throw new ValidationError('Email already exists.');
@@ -31,5 +29,5 @@ module.exports = (app) => {
     if (!user.password) throw new ValidationError('Password is required.');
   };
 
-  return { findAll, find, create };
+  return { findAll, find, create, validate };
 };

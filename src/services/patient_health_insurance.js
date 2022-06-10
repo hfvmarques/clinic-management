@@ -14,22 +14,14 @@ module.exports = (app) => {
       .where({ patientId, id: healthInsuranceId })
       .first();
 
-  const create = async (patientHealthInsurance) => {
-    await validate(patientHealthInsurance);
+  const create = async (patientHealthInsurance) =>
+    app.db('patient_health_insurances').insert(patientHealthInsurance, '*');
 
-    return app
-      .db('patient_health_insurances')
-      .insert(patientHealthInsurance, '*');
-  };
-
-  const update = async (patientId, healthInsuranceId, data) => {
-    await validate(data);
-
-    return app
+  const update = async (patientId, healthInsuranceId, data) =>
+    app
       .db('patient_health_insurances')
       .where({ patientId, id: healthInsuranceId })
       .update(data, '*');
-  };
 
   const remove = (patientId, healthInsuranceId) =>
     app
@@ -48,5 +40,5 @@ module.exports = (app) => {
       throw new ValidationError('Primary choice is required.');
   };
 
-  return { find, findById, create, update, remove };
+  return { find, findById, create, update, remove, validate };
 };

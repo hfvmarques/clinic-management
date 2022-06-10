@@ -3,6 +3,13 @@ const express = require('express');
 module.exports = (app) => {
   const router = express.Router();
 
+  const validate = (req, res, next) => {
+    app.services.health_insurance
+      .validate(req.body)
+      .then(() => next())
+      .catch((err) => next(err));
+  };
+
   router.get('/', (req, res) => {
     app.services.health_insurance
       .findAll()
@@ -16,14 +23,14 @@ module.exports = (app) => {
       .catch((err) => next(err));
   });
 
-  router.post('/', (req, res, next) => {
+  router.post('/', validate, (req, res, next) => {
     app.services.health_insurance
       .create(req.body)
       .then((result) => res.status(201).json(result[0]))
       .catch((err) => next(err));
   });
 
-  router.put('/:id', (req, res, next) => {
+  router.put('/:id', validate, (req, res, next) => {
     app.services.health_insurance
       .update(req.params.id, req.body)
       .then((result) => res.status(200).json(result[0]))
