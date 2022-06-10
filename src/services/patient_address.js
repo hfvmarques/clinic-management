@@ -8,6 +8,24 @@ module.exports = (app) => {
     app.db('patient_addresses').where({ patientId, id: addressId }).first();
 
   const create = async (patientAddress) => {
+    await validate(patientAddress);
+
+    return app.db('patient_addresses').insert(patientAddress, '*');
+  };
+
+  const update = async (patientId, addressId, data) => {
+    await validate(data);
+
+    return app
+      .db('patient_addresses')
+      .where({ patientId, id: addressId })
+      .update(data, '*');
+  };
+
+  const remove = (patientId, addressId) =>
+    app.db('patient_addresses').where({ patientId, id: addressId }).del();
+
+  const validate = async (patientAddress) => {
     if (!patientAddress.patientId)
       throw new ValidationError('Patient is required.');
     if (!patientAddress.street)
@@ -20,18 +38,9 @@ module.exports = (app) => {
       throw new ValidationError('Zip code is required.');
     if (!patientAddress.state) throw new ValidationError('State is required.');
     if (!patientAddress.city) throw new ValidationError('City is required.');
-
-    return app.db('patient_addresses').insert(patientAddress, '*');
+    if (!patientAddress.primary)
+      throw new ValidationError('Primary choice is required.');
   };
-
-  const update = (patientId, addressId, data) =>
-    app
-      .db('patient_addresses')
-      .where({ patientId, id: addressId })
-      .update(data, '*');
-
-  const remove = (patientId, addressId) =>
-    app.db('patient_addresses').where({ patientId, id: addressId }).del();
 
   return { find, findById, create, update, remove };
 };

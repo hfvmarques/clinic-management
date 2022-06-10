@@ -122,31 +122,113 @@ describe('when creating a patient address', () => {
   it('must create with all attributes', () => validCreationTemplate());
 
   it('must create without complement', () =>
-    validCreationTemplate({ complement: undefined }, 'complement', null));
+    validCreationTemplate({ complement: null }, 'complement', null));
 
-  it('must create without primary selection', () =>
-    validCreationTemplate({ primary: undefined }, 'primary', true));
+  it('must not create without primary selection', () =>
+    invalidCreationTemplate({ primary: null }, 'Primary choice is required.'));
 
   it('must not create without a patientId', () =>
-    invalidCreationTemplate({ patientId: undefined }, 'Patient is required.'));
+    invalidCreationTemplate({ patientId: null }, 'Patient is required.'));
 
   it('must not create without a street', () =>
-    invalidCreationTemplate({ street: undefined }, 'Street is required.'));
+    invalidCreationTemplate({ street: null }, 'Street is required.'));
 
   it('must not create without a number', () =>
-    invalidCreationTemplate({ number: undefined }, 'Number is required.'));
+    invalidCreationTemplate({ number: null }, 'Number is required.'));
 
   it('must not create without a district', () =>
-    invalidCreationTemplate({ district: undefined }, 'District is required.'));
+    invalidCreationTemplate({ district: null }, 'District is required.'));
 
   it('must not create without a zip code', () =>
-    invalidCreationTemplate({ zipCode: undefined }, 'Zip code is required.'));
+    invalidCreationTemplate({ zipCode: null }, 'Zip code is required.'));
 
   it('must not create without a city', () =>
-    invalidCreationTemplate({ city: undefined }, 'City is required.'));
+    invalidCreationTemplate({ city: null }, 'City is required.'));
 
   it('must not create without a state', () =>
-    invalidCreationTemplate({ state: undefined }, 'State is required.'));
+    invalidCreationTemplate({ state: null }, 'State is required.'));
+});
+
+describe('when updating a patient address', () => {
+  let validPatientAddress;
+  let address;
+
+  beforeAll(async () => {
+    const addressRes = await app.services.patient_address.create({
+      patientId: patient.id,
+      street: 'Alameda Sergio Manesque',
+      number: '891',
+      complement: 'Apto 13',
+      district: 'Jaderlândia',
+      zipCode: '68746427',
+      city: 'Castanhal',
+      state: 'PA',
+      primary: true,
+    });
+    address = { ...addressRes[0] };
+
+    validPatientAddress = {
+      patientId: patient.id,
+      street: 'Alameda Sergio Manesque',
+      number: '891',
+      complement: 'Apto 13',
+      district: 'Jaderlândia',
+      zipCode: '68746427',
+      city: 'Castanhal',
+      state: 'PA',
+      primary: true,
+    };
+  });
+
+  const validCreationTemplate = (validData, attribute, value) =>
+    request(app)
+      .put(`${MAIN_ROUTE}/${patient.id}/addresses/${address.id}`)
+      .send({ ...validPatientAddress, ...validData })
+      .set('authorization', `Bearer ${user.token}`)
+      .then((res) => {
+        expect(res.status).toBe(200);
+        expect(res.body[attribute]).toBe(value);
+      });
+
+  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+    request(app)
+      .put(`${MAIN_ROUTE}/${patient.id}/addresses/${address.id}`)
+      .send({ ...validPatientAddress, ...invalidData })
+      .set('authorization', `Bearer ${user.token}`)
+      .then((res) => {
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe(validationErrorMessage);
+      });
+
+  it('must update with all attributes', () =>
+    validCreationTemplate({ street: 'New Street' }, 'street', 'New Street'));
+
+  it('must update without complement', () =>
+    validCreationTemplate({ complement: null }, 'complement', null));
+
+  it('must not update without primary selection', () =>
+    invalidCreationTemplate({ primary: null }, 'Primary choice is required.'));
+
+  it('must not update without a patientId', () =>
+    invalidCreationTemplate({ patientId: null }, 'Patient is required.'));
+
+  it('must not update without a street', () =>
+    invalidCreationTemplate({ street: null }, 'Street is required.'));
+
+  it('must not update without a number', () =>
+    invalidCreationTemplate({ number: null }, 'Number is required.'));
+
+  it('must not update without a district', () =>
+    invalidCreationTemplate({ district: null }, 'District is required.'));
+
+  it('must not update without a zip code', () =>
+    invalidCreationTemplate({ zipCode: null }, 'Zip code is required.'));
+
+  it('must not update without a city', () =>
+    invalidCreationTemplate({ city: null }, 'City is required.'));
+
+  it('must not update without a state', () =>
+    invalidCreationTemplate({ state: null }, 'State is required.'));
 });
 
 it('must return a patient address', () =>
@@ -184,34 +266,6 @@ it('must return a patient address by id', () =>
           expect(res.body.id).toBe(result[0].id);
         })
     ));
-
-it('must update a patient address', () =>
-  app
-    .db('patient_addresses')
-    .insert(
-      {
-        patientId: patient.id,
-        street: 'Alameda Sergio Manesque',
-        number: '891',
-        complement: 'Apto 13',
-        district: 'Jaderlândia',
-        zipCode: '68746427',
-        city: 'Castanhal',
-        state: 'PA',
-        primary: true,
-      },
-      ['id']
-    )
-    .then((result) =>
-      request(app)
-        .put(`${MAIN_ROUTE}/${patient.id}/addresses/${result[0].id}`)
-        .send({ primary: false })
-        .set('authorization', `Bearer ${user.token}`)
-    )
-    .then((res) => {
-      expect(res.status).toBe(200);
-      expect(res.body.primary).toBe(false);
-    }));
 
 it('must delete a patient address', () =>
   app

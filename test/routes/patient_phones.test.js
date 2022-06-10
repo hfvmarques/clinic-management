@@ -83,7 +83,7 @@ describe('when creating a patient phone', () => {
       patientId: patient.id,
       countryCode: '55',
       phone: buildPhone(),
-      primary: false,
+      primary: true,
     };
   });
 
@@ -109,17 +109,80 @@ describe('when creating a patient phone', () => {
 
   it('must create with all attributes', () => validCreationTemplate());
 
-  it('must create without a primary selection', () =>
-    validCreationTemplate({ primary: undefined }, 'primary', true));
+  it('must not create without a primary selection', () =>
+    invalidCreationTemplate({ primary: null }, 'Primary choice is required.'));
 
-  it('must create without a country code', () =>
-    validCreationTemplate({ countryCode: undefined }, 'countryCode', '55'));
+  it('must not create without a country code', () =>
+    invalidCreationTemplate(
+      { countryCode: null },
+      'Country code is required.'
+    ));
 
   it('must not create without a phone number', () =>
-    invalidCreationTemplate({ phone: undefined }, 'Phone number is required.'));
+    invalidCreationTemplate({ phone: null }, 'Phone number is required.'));
 
   it('must not create without a patientId', () =>
-    invalidCreationTemplate({ patientId: undefined }, 'Patient is required.'));
+    invalidCreationTemplate({ patientId: null }, 'Patient is required.'));
+});
+
+describe('when updating a patient phone', () => {
+  let validPatientPhone;
+  let phone;
+
+  beforeAll(async () => {
+    const phoneRes = await app.services.patient_phone.create({
+      patientId: patient.id,
+      countryCode: '55',
+      phone: buildPhone(),
+      primary: true,
+    });
+    phone = phoneRes[0];
+
+    validPatientPhone = {
+      patientId: patient.id,
+      countryCode: '55',
+      phone: buildPhone(),
+      primary: true,
+    };
+  });
+
+  const validCreationTemplate = (validData, attribute, value) =>
+    request(app)
+      .put(`${MAIN_ROUTE}/${patient.id}/phones/${phone.id}`)
+      .send({ ...validPatientPhone, ...validData })
+      .set('authorization', `Bearer ${user.token}`)
+      .then((res) => {
+        expect(res.status).toBe(200);
+        expect(res.body[attribute]).toBe(value);
+      });
+
+  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+    request(app)
+      .put(`${MAIN_ROUTE}/${patient.id}/phones/${phone.id}`)
+      .send({ ...validPatientPhone, ...invalidData })
+      .set('authorization', `Bearer ${user.token}`)
+      .then((res) => {
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe(validationErrorMessage);
+      });
+
+  it('must update with all attributes', () =>
+    validCreationTemplate({ countryCode: '54' }, 'countryCode', '54'));
+
+  it('must not update without a primary selection', () =>
+    invalidCreationTemplate({ primary: null }, 'Primary choice is required.'));
+
+  it('must not update without a country code', () =>
+    invalidCreationTemplate(
+      { countryCode: null },
+      'Country code is required.'
+    ));
+
+  it('must not update without a phone number', () =>
+    invalidCreationTemplate({ phone: null }, 'Phone number is required.'));
+
+  it('must not update without a patientId', () =>
+    invalidCreationTemplate({ patientId: null }, 'Patient is required.'));
 });
 
 it('must return a patient phone', () =>
@@ -152,29 +215,6 @@ it('must return a patient phone by id', () =>
           expect(res.body.id).toBe(result[0].id);
         })
     ));
-
-it('must update a patient phone', () =>
-  app
-    .db('patient_phones')
-    .insert(
-      {
-        patientId: patient.id,
-        countryCode: '55',
-        phone: buildPhone(),
-        primary: false,
-      },
-      ['id']
-    )
-    .then((result) =>
-      request(app)
-        .put(`${MAIN_ROUTE}/${patient.id}/phones/${result[0].id}`)
-        .send({ primary: true })
-        .set('authorization', `Bearer ${user.token}`)
-    )
-    .then((res) => {
-      expect(res.status).toBe(200);
-      expect(res.body.primary).toBe(true);
-    }));
 
 it('must delete a patient phone', () =>
   app

@@ -87,23 +87,84 @@ describe('when creating a patient health insurance', () => {
   it('must create with all attributes successfully', () =>
     validCreationTemplate());
 
-  it('must create without primary selection', () =>
-    validCreationTemplate({ primary: undefined }, 'primary', true));
+  it('must not create without primary selection', () =>
+    invalidCreationTemplate({ primary: null }, 'Primary choice is required.'));
 
   it('must not create without a patientId', () =>
-    invalidCreationTemplate({ patientId: undefined }, 'Patient is required.'));
+    invalidCreationTemplate({ patientId: null }, 'Patient is required.'));
 
   it('must not create without a healthInsuranceId', () =>
     invalidCreationTemplate(
-      { healthInsuranceId: undefined },
+      { healthInsuranceId: null },
       'Health Insurance is required.'
     ));
 
   it('must not create without a card number', () =>
-    invalidCreationTemplate(
-      { cardNumber: undefined },
-      'Card number is required.'
+    invalidCreationTemplate({ cardNumber: null }, 'Card number is required.'));
+});
+
+describe('when updating a patient health insurance', () => {
+  let validPatientHealthInsurance;
+  let insurance;
+
+  beforeAll(async () => {
+    const insuranceRes = await app.services.patient_health_insurance.create({
+      patientId: patient.id,
+      healthInsuranceId: healthInsurance.id,
+      cardNumber: '123456789',
+      primary: true,
+    });
+    insurance = { ...insuranceRes[0] };
+
+    validPatientHealthInsurance = {
+      patientId: patient.id,
+      healthInsuranceId: healthInsurance.id,
+      cardNumber: '123456789',
+      primary: true,
+    };
+  });
+
+  const validCreationTemplate = (validData, attribute, value) =>
+    request(app)
+      .put(`${MAIN_ROUTE}/${patient.id}/insurances/${insurance.id}`)
+      .send({ ...validPatientHealthInsurance, ...validData })
+      .set('authorization', `bearer ${user.token}`)
+      .then((res) => {
+        expect(res.status).toBe(200);
+        expect(res.body[attribute]).toBe(value);
+      });
+
+  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+    request(app)
+      .put(`${MAIN_ROUTE}/${patient.id}/insurances/${insurance.id}`)
+      .send({ ...validPatientHealthInsurance, ...invalidData })
+      .set('authorization', `bearer ${user.token}`)
+      .then((res) => {
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe(validationErrorMessage);
+      });
+
+  it('must update with all attributes successfully', () =>
+    validCreationTemplate(
+      { cardNumber: '987654321' },
+      'cardNumber',
+      '987654321'
     ));
+
+  it('must not update without primary selection', () =>
+    invalidCreationTemplate({ primary: null }, 'Primary choice is required.'));
+
+  it('must not update without a patientId', () =>
+    invalidCreationTemplate({ patientId: null }, 'Patient is required.'));
+
+  it('must not update without a healthInsuranceId', () =>
+    invalidCreationTemplate(
+      { healthInsuranceId: null },
+      'Health Insurance is required.'
+    ));
+
+  it('must not update without a card number', () =>
+    invalidCreationTemplate({ cardNumber: null }, 'Card number is required.'));
 });
 
 it('must list only the patient health insurances', () =>
@@ -155,29 +216,6 @@ it('must return a patient health insurance by id', () =>
           expect(res.body.id).toBe(result[0].id);
         })
     ));
-
-it('must update a patient health insurance', () =>
-  app
-    .db('patient_health_insurances')
-    .insert(
-      {
-        patientId: patient.id,
-        healthInsuranceId: healthInsurance.id,
-        cardNumber: '123456789',
-        primary: true,
-      },
-      ['id']
-    )
-    .then((result) =>
-      request(app)
-        .put(`${MAIN_ROUTE}/${patient.id}/insurances/${result[0].id}`)
-        .send({ primary: false })
-        .set('authorization', `Bearer ${user.token}`)
-    )
-    .then((res) => {
-      expect(res.status).toBe(200);
-      expect(res.body.primary).toBe(false);
-    }));
 
 it('must delete a patient health insurance', () =>
   app

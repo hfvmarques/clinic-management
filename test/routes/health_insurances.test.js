@@ -22,42 +22,6 @@ beforeAll(async () => {
   delete user.password;
 });
 
-it('must create a health insurance successfully', () =>
-  request(app)
-    .post(MAIN_ROUTE)
-    .send({
-      name,
-      ansRecord: buildAnsRecord(),
-      accepted: true,
-    })
-    .set('authorization', `Bearer ${user.token}`)
-    .then((res) => {
-      expect(res.status).toBe(201);
-      expect(res.body.name).toBe('Health Insurance');
-    }));
-
-it('must create a health insurance without accepted selection', () =>
-  request(app)
-    .post(MAIN_ROUTE)
-    .send({
-      name,
-      ansRecord: buildAnsRecord(),
-    })
-    .set('authorization', `Bearer ${user.token}`)
-    .then((res) => {
-      expect(res.status).toBe(201);
-      expect(res.body.accepted).toBe(true);
-    }));
-
-it('must list all health_insurances', () =>
-  request(app)
-    .get(MAIN_ROUTE)
-    .set('authorization', `Bearer ${user.token}`)
-    .then((res) => {
-      expect(res.status).toBe(200);
-      expect(res.body.length).toBeGreaterThan(0);
-    }));
-
 it('must list a health insurance per id', () =>
   app
     .db('health_insurances')
@@ -76,28 +40,6 @@ it('must list a health insurance per id', () =>
     )
     .then((res) => {
       expect(res.status).toBe(200);
-    }));
-
-it('must update a health_insurance', () =>
-  app
-    .db('health_insurances')
-    .insert(
-      {
-        name,
-        ansRecord: buildAnsRecord(),
-        accepted: true,
-      },
-      ['id']
-    )
-    .then((health_insurance) =>
-      request(app)
-        .put(`${MAIN_ROUTE}/${health_insurance[0].id}`)
-        .send({ name: 'Updated Name' })
-        .set('authorization', `Bearer ${user.token}`)
-    )
-    .then((res) => {
-      expect(res.status).toBe(200);
-      expect(res.body.name).toBe('Updated Name');
     }));
 
 it('must remove a health_insurance', () =>
@@ -131,6 +73,16 @@ describe('when creating a health insurance', () => {
     };
   });
 
+  const validCreationTemplate = (validData, attribute, value) =>
+    request(app)
+      .post(MAIN_ROUTE)
+      .send({ ...validHealthInsurance, ...validData })
+      .set('authorization', `Bearer ${user.token}`)
+      .then((res) => {
+        expect(res.status).toBe(201);
+        expect(res.body[attribute]).toBe(value);
+      });
+
   const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
     request(app)
       .post(MAIN_ROUTE)
@@ -141,15 +93,84 @@ describe('when creating a health insurance', () => {
         expect(res.body.error).toBe(validationErrorMessage);
       });
 
+  it('must create successfully', () => validCreationTemplate());
+
+  it('must not create without a accepted selection', () =>
+    invalidCreationTemplate(
+      { accepted: null },
+      'Accepted choice is required.'
+    ));
+
   it('must not create without a name', () =>
-    invalidCreationTemplate({ name: undefined }, 'Name is required.'));
+    invalidCreationTemplate({ name: null }, 'Name is required.'));
 
   it('must not create without an ansRecord', () =>
-    invalidCreationTemplate(
-      { ansRecord: undefined },
-      'ANS record is required.'
-    ));
+    invalidCreationTemplate({ ansRecord: null }, 'ANS record is required.'));
 });
+
+describe('when updating a health insurance', () => {
+  let validHealthInsurance;
+  let insurance;
+
+  beforeAll(async () => {
+    const insuranceRes = await app.services.health_insurance.create({
+      name,
+      ansRecord: buildAnsRecord(),
+      accepted: true,
+    });
+    insurance = insuranceRes[0];
+
+    validHealthInsurance = {
+      name,
+      ansRecord: buildAnsRecord(),
+      accepted: true,
+    };
+  });
+
+  const validCreationTemplate = (validData, attribute, value) =>
+    request(app)
+      .put(`${MAIN_ROUTE}/${insurance.id}`)
+      .send({ ...validHealthInsurance, ...validData })
+      .set('authorization', `Bearer ${user.token}`)
+      .then((res) => {
+        expect(res.status).toBe(200);
+        expect(res.body[attribute]).toBe(value);
+      });
+
+  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+    request(app)
+      .put(`${MAIN_ROUTE}/${insurance.id}`)
+      .send({ ...validHealthInsurance, ...invalidData })
+      .set('authorization', `Bearer ${user.token}`)
+      .then((res) => {
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe(validationErrorMessage);
+      });
+
+  it('must update successfully', () =>
+    validCreationTemplate({ name: 'New Name' }, 'name', 'New Name'));
+
+  it('must not update without a accepted selection', () =>
+    invalidCreationTemplate(
+      { accepted: null },
+      'Accepted choice is required.'
+    ));
+
+  it('must not update without a name', () =>
+    invalidCreationTemplate({ name: null }, 'Name is required.'));
+
+  it('must not update without an ansRecord', () =>
+    invalidCreationTemplate({ ansRecord: null }, 'ANS record is required.'));
+});
+
+it('must list all health_insurances', () =>
+  request(app)
+    .get(MAIN_ROUTE)
+    .set('authorization', `Bearer ${user.token}`)
+    .then((res) => {
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBeGreaterThan(0);
+    }));
 
 it('must not create a health insurance with duplicated ANS record', () => {
   const duplicatedAnsRecord = '123456';

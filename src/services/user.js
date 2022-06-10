@@ -14,9 +14,7 @@ module.exports = (app) => {
   const find = (filter = {}) => app.db('users').where(filter).first();
 
   const create = async (user) => {
-    if (!user.name) throw new ValidationError('Name is required.');
-    if (!user.email) throw new ValidationError('Email is required.');
-    if (!user.password) throw new ValidationError('Password is required.');
+    await validate(user);
 
     const existingUser = await find({ email: user.email });
 
@@ -25,6 +23,12 @@ module.exports = (app) => {
     const newUser = { ...user };
     newUser.password = getPasswordHash(user.password);
     return app.db('users').insert(newUser, ['id', 'name', 'email']);
+  };
+
+  const validate = async (user) => {
+    if (!user.name) throw new ValidationError('Name is required.');
+    if (!user.email) throw new ValidationError('Email is required.');
+    if (!user.password) throw new ValidationError('Password is required.');
   };
 
   return { findAll, find, create };

@@ -15,31 +15,38 @@ module.exports = (app) => {
       .first();
 
   const create = async (patientHealthInsurance) => {
-    if (!patientHealthInsurance.patientId)
-      throw new ValidationError('Patient is required.');
-
-    if (!patientHealthInsurance.healthInsuranceId)
-      throw new ValidationError('Health Insurance is required.');
-
-    if (!patientHealthInsurance.cardNumber)
-      throw new ValidationError('Card number is required.');
+    await validate(patientHealthInsurance);
 
     return app
       .db('patient_health_insurances')
       .insert(patientHealthInsurance, '*');
   };
 
-  const update = (patientId, healthInsuranceId, data) =>
-    app
+  const update = async (patientId, healthInsuranceId, data) => {
+    await validate(data);
+
+    return app
       .db('patient_health_insurances')
       .where({ patientId, id: healthInsuranceId })
       .update(data, '*');
+  };
 
   const remove = (patientId, healthInsuranceId) =>
     app
       .db('patient_addresses')
       .where({ patientId, id: healthInsuranceId })
       .del();
+
+  const validate = async (patientHealthInsurance) => {
+    if (!patientHealthInsurance.patientId)
+      throw new ValidationError('Patient is required.');
+    if (!patientHealthInsurance.healthInsuranceId)
+      throw new ValidationError('Health Insurance is required.');
+    if (!patientHealthInsurance.cardNumber)
+      throw new ValidationError('Card number is required.');
+    if (!patientHealthInsurance.primary)
+      throw new ValidationError('Primary choice is required.');
+  };
 
   return { find, findById, create, update, remove };
 };

@@ -83,30 +83,6 @@ it('must list a patient per id', () =>
       expect(res.status).toBe(200);
     }));
 
-it('must update a patient', () =>
-  app
-    .db('patients')
-    .insert(
-      {
-        cpf: buildCpf(),
-        name: 'Olivia Vera',
-        email: buildEmail(),
-        birthDate: date,
-        gender,
-      },
-      ['id']
-    )
-    .then((patient) =>
-      request(app)
-        .put(`${MAIN_ROUTE}/${patient[0].id}`)
-        .send({ name: 'Rafaella Nascimento' })
-        .set('authorization', `Bearer ${user.token}`)
-    )
-    .then((res) => {
-      expect(res.status).toBe(200);
-      expect(res.body.name).toBe('Rafaella Nascimento');
-    }));
-
 it('must remove a patient', () =>
   app
     .db('patients')
@@ -152,16 +128,16 @@ describe('when creating a patient', () => {
       });
 
   it('must not create without a name', () =>
-    invalidCreationTemplate({ name: undefined }, 'Name is required.'));
+    invalidCreationTemplate({ name: null }, 'Name is required.'));
 
   it('must not create without a cpf', () =>
-    invalidCreationTemplate({ cpf: undefined }, 'CPF is required.'));
+    invalidCreationTemplate({ cpf: null }, 'CPF is required.'));
 
   it('must not create without an email', () =>
-    invalidCreationTemplate({ email: undefined }, 'Email is required.'));
+    invalidCreationTemplate({ email: null }, 'Email is required.'));
 
   it('must not create without a gender', () =>
-    invalidCreationTemplate({ gender: undefined }, 'Gender is required.'));
+    invalidCreationTemplate({ gender: null }, 'Gender is required.'));
 
   it('must not create with an invalid gender', () =>
     invalidCreationTemplate(
@@ -170,10 +146,62 @@ describe('when creating a patient', () => {
     ));
 
   it('must not create without a birthDate', () =>
+    invalidCreationTemplate({ birthDate: null }, 'Birth date is required.'));
+});
+
+describe('when updating a patient', () => {
+  let validPatient;
+  let patient;
+
+  beforeAll(async () => {
+    const patientRes = await app.services.patient.create({
+      cpf: buildCpf(),
+      name,
+      email: buildEmail(),
+      birthDate: date,
+      gender,
+    });
+    patient = patientRes[0];
+
+    validPatient = {
+      cpf: buildCpf(),
+      name,
+      email: buildEmail(),
+      birthDate: date,
+      gender,
+    };
+  });
+
+  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+    request(app)
+      .put(`${MAIN_ROUTE}/${patient.id}`)
+      .send({ ...validPatient, ...invalidData })
+      .set('authorization', `Bearer ${user.token}`)
+      .then((res) => {
+        expect(res.status).toBe(400);
+        expect(res.body.error).toBe(validationErrorMessage);
+      });
+
+  it('must not update without a name', () =>
+    invalidCreationTemplate({ name: null }, 'Name is required.'));
+
+  it('must not update without a cpf', () =>
+    invalidCreationTemplate({ cpf: null }, 'CPF is required.'));
+
+  it('must not update without an email', () =>
+    invalidCreationTemplate({ email: null }, 'Email is required.'));
+
+  it('must not update without a gender', () =>
+    invalidCreationTemplate({ gender: null }, 'Gender is required.'));
+
+  it('must not update with an invalid gender', () =>
     invalidCreationTemplate(
-      { birthDate: undefined },
-      'Birth date is required.'
+      { gender: 'X' },
+      'Gender must be F (female), M (male) or O (other)'
     ));
+
+  it('must not update without a birthDate', () =>
+    invalidCreationTemplate({ birthDate: null }, 'Birth date is required.'));
 });
 
 it('must not create a patient with duplicated cpf', () => {
