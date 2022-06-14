@@ -30,15 +30,26 @@ module.exports = (app) => {
       .del();
 
   const validate = async (patientHealthInsurance) => {
-    if (!patientHealthInsurance.patientId)
+    if (!patientHealthInsurance.patientId) {
       throw new ValidationError('Patient is required.');
-    if (!patientHealthInsurance.healthInsuranceId)
+    }
+    if (!patientHealthInsurance.healthInsuranceId) {
       throw new ValidationError('Health Insurance is required.');
-    if (!patientHealthInsurance.cardNumber)
+    }
+    if (!patientHealthInsurance.cardNumber) {
       throw new ValidationError('Card number is required.');
-    if (!patientHealthInsurance.primary)
+    }
+    if (!patientHealthInsurance.primary) {
       throw new ValidationError('Primary choice is required.');
+    }
   };
 
-  return { find, findById, create, update, remove, validate };
+  return {
+    find,
+    findById,
+    create,
+    update,
+    remove,
+    validate,
+  };
 };

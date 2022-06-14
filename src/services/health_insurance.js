@@ -6,29 +6,39 @@ module.exports = (app) => {
   const find = (filter = {}) =>
     app.db('health_insurances').where(filter).first();
 
-  const create = async (health_insurance) => {
+  const create = async (healthInsurance) => {
     const existingAnsRecord = await find({
-      ansRecord: health_insurance.ansRecord,
+      ansRecord: healthInsurance.ansRecord,
     });
 
-    if (existingAnsRecord)
+    if (existingAnsRecord) {
       throw new ValidationError('ANS record already registered.');
+    }
 
-    return app.db('health_insurances').insert(health_insurance, '*');
+    return app.db('health_insurances').insert(healthInsurance, '*');
   };
 
-  const update = async (id, health_insurance) =>
-    app.db('health_insurances').where({ id }).update(health_insurance, '*');
+  const update = async (id, healthInsurance) =>
+    app.db('health_insurances').where({ id }).update(healthInsurance, '*');
 
   const remove = (id) => app.db('health_insurances').where({ id }).del();
 
-  const validate = async (health_insurance) => {
-    if (!health_insurance.name) throw new ValidationError('Name is required.');
-    if (!health_insurance.accepted)
+  const validate = async (healthInsurance) => {
+    if (!healthInsurance.name) throw new ValidationError('Name is required.');
+    if (!healthInsurance.accepted) {
       throw new ValidationError('Accepted choice is required.');
-    if (!health_insurance.ansRecord)
+    }
+    if (!healthInsurance.ansRecord) {
       throw new ValidationError('ANS record is required.');
+    }
   };
 
-  return { findAll, find, create, update, remove, validate };
+  return {
+    findAll,
+    find,
+    create,
+    update,
+    remove,
+    validate,
+  };
 };

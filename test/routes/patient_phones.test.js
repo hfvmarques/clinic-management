@@ -136,7 +136,7 @@ describe('when updating a patient phone', () => {
       phone: buildPhone(),
       primary: true,
     });
-    phone = phoneRes[0];
+    phone = { ...phoneRes[0] };
 
     validPatientPhone = {
       patientId: patient.id,

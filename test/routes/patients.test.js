@@ -161,7 +161,7 @@ describe('when updating a patient', () => {
       birthDate: date,
       gender,
     });
-    patient = patientRes[0];
+    patient = { ...patientRes[0] };
 
     validPatient = {
       cpf: buildCpf(),

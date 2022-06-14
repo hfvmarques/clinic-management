@@ -13,7 +13,7 @@
     "function-paren-newline": "off",
     "prefer-const": "off",
     "implicit-arrow-linebreak": "off",
-    "operator-linebreak": "after",
+    "operator-linebreak": "off",
     "comma-dangle": [
       "error",
       {

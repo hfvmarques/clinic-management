@@ -29,5 +29,10 @@ module.exports = (app) => {
     if (!user.password) throw new ValidationError('Password is required.');
   };
 
-  return { findAll, find, create, validate };
+  return {
+    findAll,
+    find,
+    create,
+    validate,
+  };
 };

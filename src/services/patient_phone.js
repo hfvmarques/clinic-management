@@ -20,14 +20,18 @@ module.exports = (app) => {
     app.db('patient_phones').where({ patientId, id: phoneId }).del();
 
   const validate = async (patientPhone) => {
-    if (!patientPhone.phone)
+    if (!patientPhone.phone) {
       throw new ValidationError('Phone number is required.');
-    if (!patientPhone.countryCode)
+    }
+    if (!patientPhone.countryCode) {
       throw new ValidationError('Country code is required.');
-    if (!patientPhone.patientId)
+    }
+    if (!patientPhone.patientId) {
       throw new ValidationError('Patient is required.');
-    if (!patientPhone.primary)
+    }
+    if (!patientPhone.primary) {
       throw new ValidationError('Primary choice is required.');
+    }
   };
 
   return {

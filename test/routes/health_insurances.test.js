@@ -1,7 +1,7 @@
 const request = require('supertest');
 const jwt = require('jwt-simple');
 const app = require('../../src/app');
-const health_insurance = require('../../src/services/health_insurance');
+// const healthInsurance = require('../../src/services/health_insurance');
 
 const MAIN_ROUTE = '/api/health_insurances';
 const name = 'Health Insurance';
@@ -33,9 +33,9 @@ it('must list a health insurance per id', () =>
       },
       ['id']
     )
-    .then((health_insurance) =>
+    .then((insurance) =>
       request(app)
-        .get(`${MAIN_ROUTE}/${health_insurance[0].id}`)
+        .get(`${MAIN_ROUTE}/${insurance[0].id}`)
         .set('authorization', `Bearer ${user.token}`)
     )
     .then((res) => {
@@ -53,9 +53,9 @@ it('must remove a health_insurance', () =>
       },
       ['id']
     )
-    .then((health_insurance) =>
+    .then((insurance) =>
       request(app)
-        .delete(`${MAIN_ROUTE}/${health_insurance[0].id}`)
+        .delete(`${MAIN_ROUTE}/${insurance[0].id}`)
         .set('authorization', `Bearer ${user.token}`)
     )
     .then((res) => {
@@ -118,7 +118,7 @@ describe('when updating a health insurance', () => {
       ansRecord: buildAnsRecord(),
       accepted: true,
     });
-    insurance = insuranceRes[0];
+    insurance = { ...insuranceRes[0] };
 
     validHealthInsurance = {
       name,
