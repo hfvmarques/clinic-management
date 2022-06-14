@@ -204,6 +204,36 @@ describe('when updating a patient', () => {
     invalidCreationTemplate({ birthDate: null }, 'Birth date is required.'));
 });
 
+it('must update a patient successfully', () =>
+  app
+    .db('patients')
+    .insert(
+      {
+        cpf: buildCpf(),
+        name,
+        email: buildEmail(),
+        birthDate: date,
+        gender,
+      },
+      ['id']
+    )
+    .then((patient) =>
+      request(app)
+        .put(`${MAIN_ROUTE}/${patient[0].id}`)
+        .send({
+          cpf: buildCpf(),
+          name: 'New Name',
+          email: buildEmail(),
+          birthDate: date,
+          gender,
+        })
+        .set('authorization', `Bearer ${user.token}`)
+    )
+    .then((res) => {
+      expect(res.status).toBe(200);
+      expect(res.body.name).toBe('New Name');
+    }));
+
 it('must not create a patient with duplicated cpf', () => {
   const duplicatedCpf = '12345678910';
 
