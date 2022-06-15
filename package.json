@@ -20,10 +20,10 @@
     "lint:fix": "eslint ./src ./test --ext .js,.jsx,.ts,.tsx --fix",
     "style:check": "prettier --check './src/**/*.{js,jsx,ts,tsx}' './test/**/*.{js,jsx,ts,tsx}'",
     "style:fix": "prettier --write './src/**/*.{js,jsx,ts,tsx}' './test/**/*.{js,jsx,ts,tsx}'",
-    "start:dev": "node-dev src/server.js",
-    "start": "node src/server.js",
-    "test": "jest --coverage --runInBand --forceExit",
-    "test:live": "jest --watch --verbose=true"
+    "start:dev": "NODE_ENV=development node-dev src/server.js ",
+    "start": "NODE_ENV=prod node src/server.js",
+    "test": "NODE_ENV=test jest --coverage --runInBand --forceExit",
+    "test:live": "NODE_ENV=test jest --watch --verbose=true "
   },
   "keywords": [
     "nodejs",
