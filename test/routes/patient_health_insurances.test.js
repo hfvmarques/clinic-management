@@ -74,33 +74,54 @@ describe('when creating a patient health insurance', () => {
         expect(res.body[attribute]).toBe(value);
       });
 
-  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+  const invalidCreationTemplate = (invalidData) =>
     request(app)
       .post(`${MAIN_ROUTE}/${patient.id}/insurances`)
       .send({ ...validPatientHealthInsurance, ...invalidData })
-      .set('authorization', `bearer ${user.token}`)
-      .then((res) => {
-        expect(res.status).toBe(400);
-        expect(res.body.error).toBe(validationErrorMessage);
-      });
+      .set('authorization', `bearer ${user.token}`);
 
   it('must create with all attributes successfully', () =>
-    validCreationTemplate());
+    validCreationTemplate(validPatientHealthInsurance));
 
   it('must not create without primary selection', () =>
-    invalidCreationTemplate({ primary: null }, 'Primary choice is required.'));
+    invalidCreationTemplate({ primary: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not create without a patientId', () =>
-    invalidCreationTemplate({ patientId: null }, 'Patient is required.'));
+    invalidCreationTemplate({ patientId: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not create without a healthInsuranceId', () =>
-    invalidCreationTemplate(
-      { healthInsuranceId: null },
-      'Health Insurance is required.'
+    invalidCreationTemplate({ healthInsuranceId: null }).then((res) =>
+      expect(res.status).toBe(400)
     ));
 
   it('must not create without a card number', () =>
-    invalidCreationTemplate({ cardNumber: null }, 'Card number is required.'));
+    invalidCreationTemplate({ cardNumber: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
+
+  it('must not create without primary selection', () =>
+    invalidCreationTemplate({ primary: null }).then((res) =>
+      expect(res.body.error).toBe('Primary choice is required.')
+    ));
+
+  it('must not create without a patientId', () =>
+    invalidCreationTemplate({ patientId: null }).then((res) =>
+      expect(res.body.error).toBe('Patient is required.')
+    ));
+
+  it('must not create without a healthInsuranceId', () =>
+    invalidCreationTemplate({ healthInsuranceId: null }).then((res) =>
+      expect(res.body.error).toBe('Health Insurance is required.')
+    ));
+
+  it('must not create without a card number', () =>
+    invalidCreationTemplate({ cardNumber: null }).then((res) =>
+      expect(res.body.error).toBe('Card number is required.')
+    ));
 });
 
 describe('when updating a patient health insurance', () => {
@@ -124,7 +145,7 @@ describe('when updating a patient health insurance', () => {
     };
   });
 
-  const validCreationTemplate = (validData, attribute, value) =>
+  const validUpdateTemplate = (validData, attribute, value) =>
     request(app)
       .put(`${MAIN_ROUTE}/${patient.id}/insurances/${insurance.id}`)
       .send({ ...validPatientHealthInsurance, ...validData })
@@ -134,37 +155,73 @@ describe('when updating a patient health insurance', () => {
         expect(res.body[attribute]).toBe(value);
       });
 
-  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+  const invalidUpdateTemplate = (invalidData) =>
     request(app)
       .put(`${MAIN_ROUTE}/${patient.id}/insurances/${insurance.id}`)
       .send({ ...validPatientHealthInsurance, ...invalidData })
-      .set('authorization', `bearer ${user.token}`)
-      .then((res) => {
-        expect(res.status).toBe(400);
-        expect(res.body.error).toBe(validationErrorMessage);
-      });
+      .set('authorization', `bearer ${user.token}`);
 
   it('must update with all attributes successfully', () =>
-    validCreationTemplate(
+    validUpdateTemplate(
       { cardNumber: '987654321' },
       'cardNumber',
       '987654321'
     ));
 
   it('must not update without primary selection', () =>
-    invalidCreationTemplate({ primary: null }, 'Primary choice is required.'));
+    invalidUpdateTemplate({ primary: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not update without a patientId', () =>
-    invalidCreationTemplate({ patientId: null }, 'Patient is required.'));
+    invalidUpdateTemplate({ patientId: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not update without a healthInsuranceId', () =>
-    invalidCreationTemplate(
-      { healthInsuranceId: null },
-      'Health Insurance is required.'
+    invalidUpdateTemplate({ healthInsuranceId: null }).then((res) =>
+      expect(res.status).toBe(400)
     ));
 
   it('must not update without a card number', () =>
-    invalidCreationTemplate({ cardNumber: null }, 'Card number is required.'));
+    invalidUpdateTemplate({ cardNumber: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
+
+  it('must not update without primary selection', () =>
+    invalidUpdateTemplate({ primary: null }).then((res) =>
+      expect(res.body.error).toBe('Primary choice is required.')
+    ));
+
+  it('must not update without a patientId', () =>
+    invalidUpdateTemplate({ patientId: null }).then((res) =>
+      expect(res.body.error).toBe('Patient is required.')
+    ));
+
+  it('must not update without a healthInsuranceId', () =>
+    invalidUpdateTemplate({ healthInsuranceId: null }).then((res) =>
+      expect(res.body.error).toBe('Health Insurance is required.')
+    ));
+
+  it('must not update without a card number', () =>
+    invalidUpdateTemplate({ cardNumber: null }).then((res) =>
+      expect(res.body.error).toBe('Card number is required.')
+    ));
+});
+
+describe('when getting a patient health insurances', () => {
+  const getPatientInsurances = () =>
+    request(app)
+      .get(`${MAIN_ROUTE}/${patient.id}/insurances`)
+      .set('authorization', `Bearer ${user.token}`);
+
+  it('must have status 200', () =>
+    getPatientInsurances().then((res) => expect(res.status).toBe(200)));
+
+  it('must return at least one result', () =>
+    getPatientInsurances().then((res) =>
+      expect(res.body.length).toBeGreaterThan(0)
+    ));
 });
 
 it('must list only the patient health insurances', () =>
@@ -185,15 +242,6 @@ it('must list only the patient health insurances', () =>
           expect(res.body).toHaveLength(1);
         })
     ));
-
-it('must return the patient health insurances', () =>
-  request(app)
-    .get(`${MAIN_ROUTE}/${patient.id}/insurances`)
-    .set('authorization', `Bearer ${user.token}`)
-    .then((res) => {
-      expect(res.status).toBe(200);
-      expect(res.body.length).toBeGreaterThan(0);
-    }));
 
 it('must return a patient health insurance by id', () =>
   app

@@ -83,29 +83,44 @@ describe('when creating a health insurance', () => {
         expect(res.body[attribute]).toBe(value);
       });
 
-  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+  const invalidCreationTemplate = (invalidData) =>
     request(app)
       .post(MAIN_ROUTE)
       .send({ ...validHealthInsurance, ...invalidData })
-      .set('authorization', `Bearer ${user.token}`)
-      .then((res) => {
-        expect(res.status).toBe(400);
-        expect(res.body.error).toBe(validationErrorMessage);
-      });
+      .set('authorization', `Bearer ${user.token}`);
 
-  it('must create successfully', () => validCreationTemplate());
+  it('must create successfully', () =>
+    validCreationTemplate(validHealthInsurance));
 
   it('must not create without a accepted selection', () =>
-    invalidCreationTemplate(
-      { accepted: null },
-      'Accepted choice is required.'
+    invalidCreationTemplate({ accepted: null }).then((res) =>
+      expect(res.status).toBe(400)
     ));
 
   it('must not create without a name', () =>
-    invalidCreationTemplate({ name: null }, 'Name is required.'));
+    invalidCreationTemplate({ name: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not create without an ansRecord', () =>
-    invalidCreationTemplate({ ansRecord: null }, 'ANS record is required.'));
+    invalidCreationTemplate({ ansRecord: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
+
+  it('must issue the accepted selection message', () =>
+    invalidCreationTemplate({ accepted: null }).then((res) =>
+      expect(res.body.error).toBe('Accepted choice is required.')
+    ));
+
+  it('must issue the name message', () =>
+    invalidCreationTemplate({ name: null }).then((res) =>
+      expect(res.body.error).toBe('Name is required.')
+    ));
+
+  it('must issue the ansRecord message', () =>
+    invalidCreationTemplate({ ansRecord: null }).then((res) =>
+      expect(res.body.error).toBe('ANS record is required.')
+    ));
 });
 
 describe('when updating a health insurance', () => {
@@ -127,7 +142,7 @@ describe('when updating a health insurance', () => {
     };
   });
 
-  const validCreationTemplate = (validData, attribute, value) =>
+  const validUpdateTemplate = (validData, attribute, value) =>
     request(app)
       .put(`${MAIN_ROUTE}/${insurance.id}`)
       .send({ ...validHealthInsurance, ...validData })
@@ -137,40 +152,58 @@ describe('when updating a health insurance', () => {
         expect(res.body[attribute]).toBe(value);
       });
 
-  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+  const invalidUpdateTemplate = (invalidData) =>
     request(app)
       .put(`${MAIN_ROUTE}/${insurance.id}`)
       .send({ ...validHealthInsurance, ...invalidData })
-      .set('authorization', `Bearer ${user.token}`)
-      .then((res) => {
-        expect(res.status).toBe(400);
-        expect(res.body.error).toBe(validationErrorMessage);
-      });
+      .set('authorization', `Bearer ${user.token}`);
 
   it('must update successfully', () =>
-    validCreationTemplate({ name: 'New Name' }, 'name', 'New Name'));
+    validUpdateTemplate({ name: 'New Name' }, 'name', 'New Name'));
 
   it('must not update without a accepted selection', () =>
-    invalidCreationTemplate(
-      { accepted: null },
-      'Accepted choice is required.'
+    invalidUpdateTemplate({ accepted: null }).then((res) =>
+      expect(res.status).toBe(400)
     ));
 
   it('must not update without a name', () =>
-    invalidCreationTemplate({ name: null }, 'Name is required.'));
+    invalidUpdateTemplate({ name: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not update without an ansRecord', () =>
-    invalidCreationTemplate({ ansRecord: null }, 'ANS record is required.'));
+    invalidUpdateTemplate({ ansRecord: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
+
+  it('must issue the accepted selection message', () =>
+    invalidUpdateTemplate({ accepted: null }).then((res) =>
+      expect(res.body.error).toBe('Accepted choice is required.')
+    ));
+
+  it('must issue the name message', () =>
+    invalidUpdateTemplate({ name: null }).then((res) =>
+      expect(res.body.error).toBe('Name is required.')
+    ));
+
+  it('must issue the ansRecord message', () =>
+    invalidUpdateTemplate({ ansRecord: null }).then((res) =>
+      expect(res.body.error).toBe('ANS record is required.')
+    ));
 });
 
-it('must list all health_insurances', () =>
-  request(app)
-    .get(MAIN_ROUTE)
-    .set('authorization', `Bearer ${user.token}`)
-    .then((res) => {
-      expect(res.status).toBe(200);
-      expect(res.body.length).toBeGreaterThan(0);
-    }));
+describe('when listing health insurances', () => {
+  const getHealthInsurances = () =>
+    request(app).get(MAIN_ROUTE).set('authorization', `Bearer ${user.token}`);
+
+  it('must have status 200', () =>
+    getHealthInsurances().then((res) => expect(res.status).toBe(200)));
+
+  it('must have at least one result', () =>
+    getHealthInsurances().then((res) =>
+      expect(res.body.length).toBeGreaterThan(0)
+    ));
+});
 
 it('must not create a health insurance with duplicated ANS record', () => {
   const duplicatedAnsRecord = '123456';

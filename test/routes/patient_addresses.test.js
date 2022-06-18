@@ -109,44 +109,97 @@ describe('when creating a patient address', () => {
         expect(res.body[attribute]).toBe(value);
       });
 
-  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+  const invalidCreationTemplate = (invalidData) =>
     request(app)
       .post(`${MAIN_ROUTE}/${patient.id}/addresses`)
       .send({ ...validPatientAddress, ...invalidData })
-      .set('authorization', `Bearer ${user.token}`)
-      .then((res) => {
-        expect(res.status).toBe(400);
-        expect(res.body.error).toBe(validationErrorMessage);
-      });
+      .set('authorization', `Bearer ${user.token}`);
 
-  it('must create with all attributes', () => validCreationTemplate());
+  it('must create with all attributes', () =>
+    validCreationTemplate(validPatientAddress));
 
   it('must create without complement', () =>
     validCreationTemplate({ complement: null }, 'complement', null));
 
   it('must not create without primary selection', () =>
-    invalidCreationTemplate({ primary: null }, 'Primary choice is required.'));
+    invalidCreationTemplate({ primary: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not create without a patientId', () =>
-    invalidCreationTemplate({ patientId: null }, 'Patient is required.'));
+    invalidCreationTemplate({ patientId: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not create without a street', () =>
-    invalidCreationTemplate({ street: null }, 'Street is required.'));
+    invalidCreationTemplate({ street: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not create without a number', () =>
-    invalidCreationTemplate({ number: null }, 'Number is required.'));
+    invalidCreationTemplate({ number: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not create without a district', () =>
-    invalidCreationTemplate({ district: null }, 'District is required.'));
+    invalidCreationTemplate({ district: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not create without a zip code', () =>
-    invalidCreationTemplate({ zipCode: null }, 'Zip code is required.'));
+    invalidCreationTemplate({ zipCode: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not create without a city', () =>
-    invalidCreationTemplate({ city: null }, 'City is required.'));
+    invalidCreationTemplate({ city: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not create without a state', () =>
-    invalidCreationTemplate({ state: null }, 'State is required.'));
+    invalidCreationTemplate({ state: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
+
+  it('must not create without primary selection', () =>
+    invalidCreationTemplate({ primary: null }).then((res) =>
+      expect(res.body.error).toBe('Primary choice is required.')
+    ));
+
+  it('must not create without a patientId', () =>
+    invalidCreationTemplate({ patientId: null }).then((res) =>
+      expect(res.body.error).toBe('Patient is required.')
+    ));
+
+  it('must not create without a street', () =>
+    invalidCreationTemplate({ street: null }).then((res) =>
+      expect(res.body.error).toBe('Street is required.')
+    ));
+
+  it('must not create without a number', () =>
+    invalidCreationTemplate({ number: null }).then((res) =>
+      expect(res.body.error).toBe('Number is required.')
+    ));
+
+  it('must not create without a district', () =>
+    invalidCreationTemplate({ district: null }).then((res) =>
+      expect(res.body.error).toBe('District is required.')
+    ));
+
+  it('must not create without a zip code', () =>
+    invalidCreationTemplate({ zipCode: null }).then((res) =>
+      expect(res.body.error).toBe('Zip code is required.')
+    ));
+
+  it('must not create without a city', () =>
+    invalidCreationTemplate({ city: null }).then((res) =>
+      expect(res.body.error).toBe('City is required.')
+    ));
+
+  it('must not create without a state', () =>
+    invalidCreationTemplate({ state: null }).then((res) =>
+      expect(res.body.error).toBe('State is required.')
+    ));
 });
 
 describe('when updating a patient address', () => {
@@ -180,7 +233,7 @@ describe('when updating a patient address', () => {
     };
   });
 
-  const validCreationTemplate = (validData, attribute, value) =>
+  const validUpdateTemplate = (validData, attribute, value) =>
     request(app)
       .put(`${MAIN_ROUTE}/${patient.id}/addresses/${address.id}`)
       .send({ ...validPatientAddress, ...validData })
@@ -190,55 +243,111 @@ describe('when updating a patient address', () => {
         expect(res.body[attribute]).toBe(value);
       });
 
-  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+  const invalidUpdateTemplate = (invalidData) =>
     request(app)
       .put(`${MAIN_ROUTE}/${patient.id}/addresses/${address.id}`)
       .send({ ...validPatientAddress, ...invalidData })
-      .set('authorization', `Bearer ${user.token}`)
-      .then((res) => {
-        expect(res.status).toBe(400);
-        expect(res.body.error).toBe(validationErrorMessage);
-      });
+      .set('authorization', `Bearer ${user.token}`);
 
   it('must update with all attributes', () =>
-    validCreationTemplate({ street: 'New Street' }, 'street', 'New Street'));
+    validUpdateTemplate({ street: 'New Street' }, 'street', 'New Street'));
 
   it('must update without complement', () =>
-    validCreationTemplate({ complement: null }, 'complement', null));
+    validUpdateTemplate({ complement: null }, 'complement', null));
 
   it('must not update without primary selection', () =>
-    invalidCreationTemplate({ primary: null }, 'Primary choice is required.'));
+    invalidUpdateTemplate({ primary: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not update without a patientId', () =>
-    invalidCreationTemplate({ patientId: null }, 'Patient is required.'));
+    invalidUpdateTemplate({ patientId: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not update without a street', () =>
-    invalidCreationTemplate({ street: null }, 'Street is required.'));
+    invalidUpdateTemplate({ street: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not update without a number', () =>
-    invalidCreationTemplate({ number: null }, 'Number is required.'));
+    invalidUpdateTemplate({ number: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not update without a district', () =>
-    invalidCreationTemplate({ district: null }, 'District is required.'));
+    invalidUpdateTemplate({ district: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not update without a zip code', () =>
-    invalidCreationTemplate({ zipCode: null }, 'Zip code is required.'));
+    invalidUpdateTemplate({ zipCode: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not update without a city', () =>
-    invalidCreationTemplate({ city: null }, 'City is required.'));
+    invalidUpdateTemplate({ city: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not update without a state', () =>
-    invalidCreationTemplate({ state: null }, 'State is required.'));
+    invalidUpdateTemplate({ state: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
+
+  it('must not update without primary selection', () =>
+    invalidUpdateTemplate({ primary: null }).then((res) =>
+      expect(res.body.error).toBe('Primary choice is required.')
+    ));
+
+  it('must not update without a patientId', () =>
+    invalidUpdateTemplate({ patientId: null }).then((res) =>
+      expect(res.body.error).toBe('Patient is required.')
+    ));
+
+  it('must not update without a street', () =>
+    invalidUpdateTemplate({ street: null }).then((res) =>
+      expect(res.body.error).toBe('Street is required.')
+    ));
+
+  it('must not update without a number', () =>
+    invalidUpdateTemplate({ number: null }).then((res) =>
+      expect(res.body.error).toBe('Number is required.')
+    ));
+
+  it('must not update without a district', () =>
+    invalidUpdateTemplate({ district: null }).then((res) =>
+      expect(res.body.error).toBe('District is required.')
+    ));
+
+  it('must not update without a zip code', () =>
+    invalidUpdateTemplate({ zipCode: null }).then((res) =>
+      expect(res.body.error).toBe('Zip code is required.')
+    ));
+
+  it('must not update without a city', () =>
+    invalidUpdateTemplate({ city: null }).then((res) =>
+      expect(res.body.error).toBe('City is required.')
+    ));
+
+  it('must not update without a state', () =>
+    invalidUpdateTemplate({ state: null }).then((res) =>
+      expect(res.body.error).toBe('State is required.')
+    ));
 });
 
-it('must return a patient address', () =>
-  request(app)
-    .get(`${MAIN_ROUTE}/${patient.id}/addresses`)
-    .set('authorization', `Bearer ${user.token}`)
-    .then((res) => {
-      expect(res.status).toBe(200);
-      expect(res.body.length).toBeGreaterThan(0);
-    }));
+describe('when getting a patient addresses', () => {
+  const getAddresses = () =>
+    request(app)
+      .get(`${MAIN_ROUTE}/${patient.id}/addresses`)
+      .set('authorization', `Bearer ${user.token}`);
+
+  it('must have status 200', () =>
+    getAddresses().then((res) => expect(res.status).toBe(200)));
+
+  it('must have at least one result', () =>
+    getAddresses().then((res) => expect(res.body.length).toBeGreaterThan(0)));
+});
 
 it('must return a patient address by id', () =>
   app

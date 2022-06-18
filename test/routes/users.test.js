@@ -21,14 +21,6 @@ beforeAll(async () => {
   user.token = jwt.encode(user, 'Secret!');
 });
 
-it('must have status 200', () =>
-  request(app)
-    .get(MAIN_ROUTE)
-    .set('authorization', `Bearer ${user.token}`)
-    .then((res) => {
-      expect(res.status).toBe(200);
-    }));
-
 it('must create a user', () =>
   request(app)
     .post(MAIN_ROUTE)
@@ -42,6 +34,23 @@ it('must create a user', () =>
       expect(res.status).toBe(201);
       expect(res.body.name).toBe('Walter White');
     }));
+
+describe('when getting all users', () => {
+  const getUsers = () =>
+    request(app).get(MAIN_ROUTE).set('authorization', `Bearer ${user.token}`);
+
+  it('must return status 200', () =>
+    getUsers().then((res) => expect(res.status).toBe(200)));
+
+  it('must return at least one result', () =>
+    getUsers().then((res) => expect(res.body.length).toBeGreaterThan(0)));
+
+  it('must have name property', () =>
+    getUsers().then((res) => expect(res.body[0]).toHaveProperty('name')));
+
+  it('must have email property', () =>
+    getUsers().then((res) => expect(res.body[0]).toHaveProperty('email')));
+});
 
 it('must not return user password in body response', () =>
   request(app)
@@ -75,23 +84,6 @@ it('must store crypto password', async () => {
   expect(userDb.password).not.toBe('123456');
 });
 
-it('must list one user', () =>
-  request(app)
-    .get(MAIN_ROUTE)
-    .set('authorization', `Bearer ${user.token}`)
-    .then((res) => {
-      expect(res.body.length).toBeGreaterThan(0);
-    }));
-
-it('must list user prop', () =>
-  request(app)
-    .get(MAIN_ROUTE)
-    .set('authorization', `Bearer ${user.token}`)
-    .then((res) => {
-      expect(res.body[0]).toHaveProperty('name');
-      expect(res.body[0]).toHaveProperty('email');
-    }));
-
 describe('when creating a user', () => {
   let validUser;
   beforeAll(() => {
@@ -102,24 +94,41 @@ describe('when creating a user', () => {
     };
   });
 
-  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+  const invalidCreationTemplate = (invalidData) =>
     request(app)
       .post(MAIN_ROUTE)
       .send({ ...validUser, ...invalidData })
-      .set('authorization', `Bearer ${user.token}`)
-      .then((res) => {
-        expect(res.status).toBe(400);
-        expect(res.body.error).toBe(validationErrorMessage);
-      });
+      .set('authorization', `Bearer ${user.token}`);
 
   it('must not create without a name', () =>
-    invalidCreationTemplate({ name: undefined }, 'Name is required.'));
+    invalidCreationTemplate({ name: undefined }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not create without a email', () =>
-    invalidCreationTemplate({ email: undefined }, 'Email is required.'));
+    invalidCreationTemplate({ email: undefined }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not create without a password', () =>
-    invalidCreationTemplate({ password: undefined }, 'Password is required.'));
+    invalidCreationTemplate({ password: undefined }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
+
+  it('must not create without a name', () =>
+    invalidCreationTemplate({ name: undefined }).then((res) =>
+      expect(res.body.error).toBe('Name is required.')
+    ));
+
+  it('must not create without a email', () =>
+    invalidCreationTemplate({ email: undefined }).then((res) =>
+      expect(res.body.error).toBe('Email is required.')
+    ));
+
+  it('must not create without a password', () =>
+    invalidCreationTemplate({ password: undefined }).then((res) =>
+      expect(res.body.error).toBe('Password is required.')
+    ));
 });
 
 it('must not create a user with an existing email', () => {

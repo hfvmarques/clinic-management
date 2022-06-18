@@ -43,23 +43,16 @@ it('must create a patient successfully', () =>
       expect(result.body.name).toBe('Olivia Vera');
     }));
 
-it('must list all patients', () =>
-  app
-    .db('patients')
-    .insert({
-      cpf: buildCpf(),
-      name,
-      email: buildEmail(),
-      birthDate: date,
-      gender,
-    })
-    .then(() =>
-      request(app).get(MAIN_ROUTE).set('authorization', `Bearer ${user.token}`)
-    )
-    .then((res) => {
-      expect(res.status).toBe(200);
-      expect(res.body.length).toBeGreaterThan(0);
-    }));
+describe('when getting all patients', () => {
+  const getPatients = () =>
+    request(app).get(MAIN_ROUTE).set('authorization', `Bearer ${user.token}`);
+
+  it('must return status 200', () =>
+    getPatients().then((res) => expect(res.status).toBe(200)));
+
+  it('must return at least one result', () =>
+    getPatients().then((res) => expect(res.body.length).toBeGreaterThan(0)));
+});
 
 it('must list a patient per id', () =>
   app
@@ -117,36 +110,73 @@ describe('when creating a patient', () => {
     };
   });
 
-  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+  const invalidCreationTemplate = (invalidData) =>
     request(app)
       .post(MAIN_ROUTE)
       .send({ ...validPatient, ...invalidData })
-      .set('authorization', `Bearer ${user.token}`)
-      .then((res) => {
-        expect(res.status).toBe(400);
-        expect(res.body.error).toBe(validationErrorMessage);
-      });
+      .set('authorization', `Bearer ${user.token}`);
 
   it('must not create without a name', () =>
-    invalidCreationTemplate({ name: null }, 'Name is required.'));
+    invalidCreationTemplate({ name: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not create without a cpf', () =>
-    invalidCreationTemplate({ cpf: null }, 'CPF is required.'));
+    invalidCreationTemplate({ cpf: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not create without an email', () =>
-    invalidCreationTemplate({ email: null }, 'Email is required.'));
+    invalidCreationTemplate({ email: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not create without a gender', () =>
-    invalidCreationTemplate({ gender: null }, 'Gender is required.'));
+    invalidCreationTemplate({ gender: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not create with an invalid gender', () =>
-    invalidCreationTemplate(
-      { gender: 'X' },
-      'Gender must be F (female), M (male) or O (other)'
+    invalidCreationTemplate({ gender: 'X' }).then((res) =>
+      expect(res.status).toBe(400)
     ));
 
   it('must not create without a birthDate', () =>
-    invalidCreationTemplate({ birthDate: null }, 'Birth date is required.'));
+    invalidCreationTemplate({ birthDate: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
+
+  it('must not create without a name', () =>
+    invalidCreationTemplate({ name: null }).then((res) =>
+      expect(res.body.error).toBe('Name is required.')
+    ));
+
+  it('must not create without a cpf', () =>
+    invalidCreationTemplate({ cpf: null }).then((res) =>
+      expect(res.body.error).toBe('CPF is required.')
+    ));
+
+  it('must not create without an email', () =>
+    invalidCreationTemplate({ email: null }).then((res) =>
+      expect(res.body.error).toBe('Email is required.')
+    ));
+
+  it('must not create without a gender', () =>
+    invalidCreationTemplate({ gender: null }).then((res) =>
+      expect(res.body.error).toBe('Gender is required.')
+    ));
+
+  it('must not create with an invalid gender', () =>
+    invalidCreationTemplate({ gender: 'X' }).then((res) =>
+      expect(res.body.error).toBe(
+        'Gender must be F (female), M (male) or O (other)'
+      )
+    ));
+
+  it('must not create without a birthDate', () =>
+    invalidCreationTemplate({ birthDate: null }).then((res) =>
+      expect(res.body.error).toBe('Birth date is required.')
+    ));
 });
 
 describe('when updating a patient', () => {
@@ -172,36 +202,73 @@ describe('when updating a patient', () => {
     };
   });
 
-  const invalidCreationTemplate = (invalidData, validationErrorMessage) =>
+  const invalidUpdateTemplate = (invalidData) =>
     request(app)
       .put(`${MAIN_ROUTE}/${patient.id}`)
       .send({ ...validPatient, ...invalidData })
-      .set('authorization', `Bearer ${user.token}`)
-      .then((res) => {
-        expect(res.status).toBe(400);
-        expect(res.body.error).toBe(validationErrorMessage);
-      });
+      .set('authorization', `Bearer ${user.token}`);
 
   it('must not update without a name', () =>
-    invalidCreationTemplate({ name: null }, 'Name is required.'));
+    invalidUpdateTemplate({ name: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not update without a cpf', () =>
-    invalidCreationTemplate({ cpf: null }, 'CPF is required.'));
+    invalidUpdateTemplate({ cpf: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not update without an email', () =>
-    invalidCreationTemplate({ email: null }, 'Email is required.'));
+    invalidUpdateTemplate({ email: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not update without a gender', () =>
-    invalidCreationTemplate({ gender: null }, 'Gender is required.'));
+    invalidUpdateTemplate({ gender: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
 
   it('must not update with an invalid gender', () =>
-    invalidCreationTemplate(
-      { gender: 'X' },
-      'Gender must be F (female), M (male) or O (other)'
+    invalidUpdateTemplate({ gender: 'X' }).then((res) =>
+      expect(res.status).toBe(400)
     ));
 
   it('must not update without a birthDate', () =>
-    invalidCreationTemplate({ birthDate: null }, 'Birth date is required.'));
+    invalidUpdateTemplate({ birthDate: null }).then((res) =>
+      expect(res.status).toBe(400)
+    ));
+
+  it('must not update without a name', () =>
+    invalidUpdateTemplate({ name: null }).then((res) =>
+      expect(res.body.error).toBe('Name is required.')
+    ));
+
+  it('must not update without a cpf', () =>
+    invalidUpdateTemplate({ cpf: null }).then((res) =>
+      expect(res.body.error).toBe('CPF is required.')
+    ));
+
+  it('must not update without an email', () =>
+    invalidUpdateTemplate({ email: null }).then((res) =>
+      expect(res.body.error).toBe('Email is required.')
+    ));
+
+  it('must not update without a gender', () =>
+    invalidUpdateTemplate({ gender: null }).then((res) =>
+      expect(res.body.error).toBe('Gender is required.')
+    ));
+
+  it('must not update with an invalid gender', () =>
+    invalidUpdateTemplate({ gender: 'X' }).then((res) =>
+      expect(res.body.error).toBe(
+        'Gender must be F (female), M (male) or O (other)'
+      )
+    ));
+
+  it('must not update without a birthDate', () =>
+    invalidUpdateTemplate({ birthDate: null }).then((res) =>
+      expect(res.body.error).toBe('Birth date is required.')
+    ));
 });
 
 it('must update a patient successfully', () =>
